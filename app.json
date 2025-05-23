@@ -42,12 +42,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": "14812166-6d80-41f5-b70c-f34464d086d3"
+        "projectId": "1de128ca-d79e-4cea-91d6-504ab4eb858d"
       }
     },
     "owner": "joycebarbosag",
     "updates": {
-      "url": "https://u.expo.dev/14812166-6d80-41f5-b70c-f34464d086d3"
+      "url": "https://u.expo.dev/1de128ca-d79e-4cea-91d6-504ab4eb858d"
     },
     "runtimeVersion": {
       "policy": "appVersion"
