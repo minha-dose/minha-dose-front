@@ -14,15 +14,35 @@ export const globalStyles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    pickerState: {
-        height: 50,
-        width: 90,
-        color: '#083474',
+    aboutContainer: {
+        marginTop: 50,
+        alignItems: 'center'
     },
-    viewPickerState: {
-        backgroundColor: '#e0e0e0',
-        borderRadius: 8,
-        width: 90
+    about: {
+        height: "43%",
+        width: "80%",
+        marginTop: 20,
+        padding: 20,
+        borderRadius: 10,
+        backgroundColor: '#083474',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 5,
+            height: 5,
+        },
+        shadowOpacity: 0.35,
+        shadowRadius: 3.84,
+    },
+    aboutText: {
+        fontSize: 20,
+        textAlign: 'justify',
+        color: 'white',
+    },
+    connect: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 20,
     },
     profileHorizontalContainer: {
         flexDirection: "row",
@@ -75,7 +95,7 @@ export const globalStyles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'blue',
     },
-    staticInputProfile:{
+    staticInputProfile: {
         marginBottom: 10,
     },
     temporaryBtn: {
@@ -85,7 +105,7 @@ export const globalStyles = StyleSheet.create({
         borderRadius: 5,
         alignItems: "center",
     },
-    temporaryBtnTxt:{
+    temporaryBtnTxt: {
         color: "white",
         fontWeight: "bold"
     },
