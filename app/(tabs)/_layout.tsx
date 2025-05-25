@@ -6,7 +6,13 @@ import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
     return (
-        <Tabs screenOptions={{ tabBarActiveTintColor: "#083474"}}>
+        <Tabs screenOptions={{
+            tabBarActiveTintColor: "#083474", headerStyle: { backgroundColor: "#083474"},
+            headerTintColor: "#fff",
+            tabBarStyle: {
+                backgroundColor: '#FAFAFA'
+            }
+        }}>
             <Tabs.Screen
                 name="index"
                 options={{
@@ -18,28 +24,28 @@ export default function TabLayout() {
                 name="home"
                 options={{
                     title: 'Home',
-                    tabBarIcon: ({color, size}) => <Entypo name="home" size={size} color={color} />,
+                    tabBarIcon: ({ color, size }) => <Entypo name="home" size={size} color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="vaccincard"
                 options={{
                     title: 'Meu cartão',
-                    tabBarIcon: ({color, size}) => <Octicons name="checklist" size={size} color={color} />
+                    tabBarIcon: ({ color, size }) => <Octicons name="checklist" size={size} color={color} />
                 }}
             />
             <Tabs.Screen
                 name="vaccins"
                 options={{
                     title: 'Vacinas',
-                    tabBarIcon: ({color, size}) => <MaterialIcons name="vaccines" size={size} color={color} />
+                    tabBarIcon: ({ color, size }) => <MaterialIcons name="vaccines" size={size} color={color} />
                 }}
             />
             <Tabs.Screen
                 name="profile"
                 options={{
                     title: "Perfil",
-                    tabBarIcon: ({color, size}) => <Ionicons name="person-circle" size={size} color={color} />
+                    tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" size={size} color={color} />
                 }}
             />
             <Tabs.Screen
@@ -47,7 +53,7 @@ export default function TabLayout() {
                 options={{
                     title: "Sobre",
                     headerShown: false,
-                    tabBarIcon: ({color, size}) => <Octicons name="question" size={size} color={color} />
+                    tabBarIcon: ({ color, size }) => <Octicons name="question" size={size} color={color} />
                 }}
             />
         </Tabs>
