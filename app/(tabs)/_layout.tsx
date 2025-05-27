@@ -1,4 +1,5 @@
 import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Octicons from '@expo/vector-icons/Octicons';
@@ -25,6 +26,13 @@ export default function TabLayout() {
                 options={{
                     title: 'Home',
                     tabBarIcon: ({ color, size }) => <Entypo name="home" size={size} color={color} />,
+                }}
+            />
+            <Tabs.Screen
+                name="ubs"
+                options={{
+                    title: 'UBS',
+                    tabBarIcon: ({ color, size }) => <FontAwesome6 name="hospital" size={size} color={color} />
                 }}
             />
             <Tabs.Screen
