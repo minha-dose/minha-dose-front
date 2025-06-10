@@ -1,22 +1,14 @@
-import { Text, View } from "react-native";
-import { useContext } from "react";
-import { ThemeContext } from "./theme/ThemeContext";
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
 
 export default function Index() {
-  const { theme } = useContext(ThemeContext);
+  const router = useRouter();
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: theme.background, 
-      }}
-    >
-      <Text style={{ color: theme.text }}>
-        Edit app/index.tsx to edit this screen.
-      </Text>
-    </View>
-  );
+  useEffect(() => {
+    setTimeout(() => {
+      router.replace("/login"); 
+    }, 100);
+  }, []);
+
+  return null;
 }

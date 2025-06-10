@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, Modal } from 'react-native';
-import {globalStyles} from '../../styles/globalStyle';
+import { View, TextInput, TouchableOpacity, Text } from 'react-native';
+import { globalStyles } from '../../styles/globalStyle';
 import SuccessModal from '../../components/SuccessModal';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRouter } from 'expo-router';
 
-type RootStackParamList = {
-  Login: undefined;
-  // add other routes here if needed
-};
-
-type CadastroScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
-
-interface CadastroScreenProps {
-  navigation: CadastroScreenNavigationProp;
-}
-
-export default function CadastroScreen({ navigation }: CadastroScreenProps) {
+export default function CadastroScreen() {
   const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
   const handleRegister = () => {
     setModalVisible(true);
@@ -37,14 +27,14 @@ export default function CadastroScreen({ navigation }: CadastroScreenProps) {
 
       <Text style={globalStyles.footerText}>
         Já possui cadastro?
-        <Text onPress={() => navigation.navigate('Login')} style={globalStyles.link}> Logar</Text>
+        <Text onPress={() => router.push('/login')} style={globalStyles.link}> Logar</Text>
       </Text>
 
       <SuccessModal
         visible={modalVisible}
         onClose={() => {
           setModalVisible(false);
-          navigation.navigate('Login');
+          router.push('/login');
         }}
       />
     </View>
