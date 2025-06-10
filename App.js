@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
-// Importamos o ícone de seta para a esquerda (Ionicons) e um ícone de seringa 
+// Importamos o ícone de seta para a esquerda (Ionicons) e um ícone de seringa
 // Certifique-se de que a biblioteca @expo/vector-icons está instalada.
 // Se não estiver, execute no terminal: npm install @expo/vector-icons
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
@@ -32,7 +32,7 @@ const VaccineCard = ({ vaccine }) => (
   </View>
 );
 
-// --- Componente da Barra de Navegação Inferior ---
+// --- Componente da Barra de Navegação  ---
 const BottomTabBar = () => (
   <View style={styles.tabBar}>
     <TouchableOpacity style={styles.tabItem}>
