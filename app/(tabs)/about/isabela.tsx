@@ -11,9 +11,9 @@ import { ScrollView } from "react-native-gesture-handler";
 export default function Isabela() {
     return (
         <ScrollView contentContainerStyle={globalStyles.aboutContainer}>
-            <PhotoCircle imageSource={require('@/assets/images/devs/emmanuel.jpg')} size={200}></PhotoCircle>
+            <PhotoCircle imageSource={require('@/assets/images/devs/isabela.jpg')} size={200}></PhotoCircle>
             <AboutComponent>
-                <Text style={globalStyles.aboutText}>Isabela é estudante do curso de Sistemas para Internet da Universidade Católica de Pernambuco (UNICAP).
+                <Text style={globalStyles.aboutText}>Isabela Araujo é estudante de Sistemas para Internet pela Universidade Católica de Pernambuco, engenheira mecânica em formação pela Escola Politécnica de Pernambuco e analista de dados na BRK Ambiental. nas horas vagas gostar de ouvir música e assistir novela
                 </Text>
             </AboutComponent>
             <Text style={{ marginTop: 20, marginBottom: 20 }}>Conecte-se com Emmanuel Meireles!</Text>
