@@ -1,3 +1,4 @@
+
 import { globalStyles } from "@/styles/globalStyle";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import React, { useState } from "react";

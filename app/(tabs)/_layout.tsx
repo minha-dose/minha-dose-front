@@ -1,18 +1,37 @@
+import React, { useContext } from "react";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Octicons from '@expo/vector-icons/Octicons';
 import { Tabs } from 'expo-router';
+import { TouchableOpacity } from "react-native";
+import { ThemeContext } from "./theme/ThemeContext";
+
+// Botão de alternância de tema
+function ThemeToggleButton() {
+    const { theme, toggleTheme } = useContext(ThemeContext);
+    return (
+        <TouchableOpacity onPress={toggleTheme} style={{ marginRight: 16 }}>
+            <Ionicons
+                name={theme.background === "#181A20" ? "sunny" : "moon"}
+                size={24}
+                color={theme.icon}
+            />
+        </TouchableOpacity>
+    );
+}
 
 export default function TabLayout() {
+    const { theme } = useContext(ThemeContext);
+
     return (
         <Tabs screenOptions={{
-            tabBarActiveTintColor: "#083474", headerStyle: { backgroundColor: "#083474"},
-            headerTintColor: "#fff",
-            tabBarStyle: {
-                backgroundColor: '#FAFAFA'
-            }
+            tabBarActiveTintColor: theme.primary,
+            headerStyle: { backgroundColor: theme.navBar },
+            headerTintColor: theme.icon,
+            tabBarStyle: { backgroundColor: theme.background },
+            headerRight: () => <ThemeToggleButton />
         }}>
             <Tabs.Screen
                 name="index"
@@ -66,6 +85,5 @@ export default function TabLayout() {
                 }}
             />
         </Tabs>
-
     );
 }
