@@ -34,13 +34,6 @@ export default function TabLayout() {
             headerRight: () => <ThemeToggleButton />
         }}>
             <Tabs.Screen
-                name="index"
-                options={{
-                    title: 'Login',
-                    href: null
-                }}
-            />
-            <Tabs.Screen
                 name="home"
                 options={{
                     title: 'Home',
