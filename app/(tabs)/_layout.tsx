@@ -32,6 +32,7 @@ export default function TabLayout() {
                 name="ubs"
                 options={{
                     title: 'UBS',
+                    headerShown: false,
                     tabBarIcon: ({ color, size }) => <FontAwesome6 name="hospital" size={size} color={color} />
                 }}
             />
