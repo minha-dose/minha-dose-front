@@ -1,56 +1,57 @@
+import api from '@/services/api';
 import { FontAwesome6 } from '@expo/vector-icons';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-    FlatList,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-const ubsList = [
-  {
-    id: "1",
-    name: "UBS Boa Viagem",
-    address: "Rua Conselheiro Aguiar, 258, Boa Viagem, Recife - PE",
-    horario: "7h às 8h - Segunda a sexta\n8h às 12h - Sábado",
-  },
-  {
-    id: "2",
-    name: "UBS Boa Viagem",
-    address: "Rua Conselheiro Aguiar, 258, Boa Viagem, Recife - PE",
-    horario: "7h às 8h - Segunda a sexta\n8h às 12h - Sábado",
-  },
-  {
-    id: "3",
-    name: "UBS Boa Viagem",
-    address: "Rua Conselheiro Aguiar, 258, Boa Viagem, Recife - PE",
-    horario: "7h às 8h - Segunda a sexta\n8h às 12h - Sábado",
-  },
-  {
-    id: "4",
-    name: "UBS Boa Viagem",
-    address: "Rua Conselheiro Aguiar, 258, Boa Viagem, Recife - PE",
-    horario: "7h às 8h - Segunda a sexta\n8h às 12h - Sábado",
-  },
-];
-
 export default function Ubs() {
+  const [ubsList, setUbsList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUbs, setSelectedUbs] = useState(null);
+
+  useEffect(() => {
+    async function fetchUbs() {
+      try {
+        const response = await api.get('/api/v1/ubs/');
+        setUbsList(response.data); 
+      } catch (error) {
+        console.error("Erro ao buscar UBS:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUbs();
+  }, []);
 
   const openModal = (ubs) => {
     setSelectedUbs(ubs);
     setModalVisible(true);
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#002856" />
+        <Text>Carregando UBSs...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
         data={ubsList}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => (
           <View style={styles.card}>
@@ -58,8 +59,8 @@ export default function Ubs() {
               <FontAwesome6 name="hospital" size={40} color="#002856" />
             </View>
             <View style={styles.cardContent}>
-              <Text style={styles.ubsName}>{item.name}</Text>
-              <Text style={styles.ubsAddress}>{item.address}</Text>
+              <Text style={styles.ubsName}>{item.ubsName}</Text>
+              <Text style={styles.ubsAddress}>{item.address?.street}, {item.address?.neighborhood}, {item.address?.city} - {item.address?.district}</Text>
               <TouchableOpacity
                 style={styles.button}
                 onPress={() => openModal(item)}
@@ -71,7 +72,6 @@ export default function Ubs() {
         )}
       />
 
-      {/* Modal com detalhes da UBS */}
       <Modal
         visible={modalVisible}
         transparent
@@ -80,14 +80,14 @@ export default function Ubs() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>{selectedUbs?.name}</Text>
+            <Text style={styles.modalTitle}>{selectedUbs?.ubsName}</Text>
             <Text style={styles.modalText}>
               <Text style={styles.label}>Endereço: </Text>
-              {selectedUbs?.address}
+              {selectedUbs?.address?.street}, {selectedUbs?.address?.neighborhood}, {selectedUbs?.address?.city} - {selectedUbs?.address?.district}
             </Text>
             <Text style={styles.modalText}>
-              <Text style={styles.label}>Horário de Funcionamento: </Text>
-              {selectedUbs?.horario}
+              <Text style={styles.label}>Contato: </Text>
+              {selectedUbs?.contact?.phone} | {selectedUbs?.contact?.email}
             </Text>
 
             <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
@@ -99,6 +99,7 @@ export default function Ubs() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
