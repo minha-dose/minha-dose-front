@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
-import { globalStyles } from '../../styles/globalStyle';
-import SuccessModal from '../../components/SuccessModal';
+import { globalStyles } from '../styles/globalStyle';
+import SuccessModal from '../components/SuccessModal';
 import { useRouter } from 'expo-router';
 
 export default function CadastroScreen() {

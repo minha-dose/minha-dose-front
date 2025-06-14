@@ -1,8 +1,6 @@
-import api from '@/services/api';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
@@ -10,7 +8,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
+import api from '@/services/api'; 
 
 export default function Ubs() {
   const [ubsList, setUbsList] = useState([]);

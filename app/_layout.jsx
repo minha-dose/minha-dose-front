@@ -1,10 +1,16 @@
-import { ThemeProvider } from "./(tabs)/theme/ThemeContext";
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
+import React from "react";
+import { StatusBar } from "expo-status-bar";
 
-export default function RootLayout() {
+export const unstable_settings = {
+  initialRouteName: "(tabs)",
+};
+
+export default function ProtectedLayout() {
   return (
-    <ThemeProvider>
-      <Slot />
-    </ThemeProvider>
+    <React.Fragment>
+      <StatusBar style="auto" />
+      <Stack screenOptions={{ headerShown: false }} />
+    </React.Fragment>
   );
 }

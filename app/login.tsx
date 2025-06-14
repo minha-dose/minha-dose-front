@@ -1,9 +1,40 @@
+import React, { useState } from 'react';
+import axios from 'axios';
 import logo from '@/assets/images/logo/minha-dose-logo.png';
 import { useRouter } from 'expo-router';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useUserStore } from './store/useUserStore'; // ajuste o caminho conforme seu projeto
 
 export default function LoginScreen() {
   const router = useRouter();
+  const setUser = useUserStore((state) => state.setUser);
+
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [error, setError] = useState('');
+
+  async function handleLogin() {
+    setError('');
+
+    try {
+      const response = await axios.get(
+        `https://minha-dose-express-copy-nine.vercel.app/api/v1/users/email?email=${encodeURIComponent(email)}`
+      );
+
+      const userData = response.data;
+
+      if (userData && userData.password === senha) {
+        const { password, ...userWithoutPassword } = userData;
+        setUser(userWithoutPassword);
+
+        router.push('/home');
+      } else {
+        setError('Senha ou usuário incorretos.');
+      }
+    } catch (e) {
+      setError('Senha ou usuário incorretos.');
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -13,10 +44,27 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.bottomContainer}>
-        <TextInput placeholder="CPF" placeholderTextColor="#fff" style={styles.input} />
-        <TextInput placeholder="Senha" placeholderTextColor="#fff" secureTextEntry style={styles.input} />
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#fff"
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          placeholder="Senha"
+          placeholderTextColor="#fff"
+          secureTextEntry
+          style={styles.input}
+          value={senha}
+          onChangeText={setSenha}
+        />
 
-        <TouchableOpacity style={styles.button}>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
@@ -43,19 +91,20 @@ const styles = StyleSheet.create({
     width: 290,
     height: 290,
     resizeMode: 'contain',
-    marginBottom: 0, 
-    marginTop: -30,// remove qualquer espaço extra abaixo da logo
+    marginBottom: 0,
+    marginTop: 40,
   },
   subtitle: {
     fontSize: 16,
     color: '#000',
-    marginTop: -100, 
-    marginBottom: 20,// garante que fique colado na logo
+    marginTop: -100,
+    marginBottom: 20,
   },
   bottomContainer: {
     flex: 1,
     backgroundColor: '#002C66',
     borderTopLeftRadius: 60,
+    marginTop: 50,
     borderTopRightRadius: 60,
     paddingTop: 50,
     paddingHorizontal: 30,
@@ -90,5 +139,10 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: 'bold',
     color: '#fff',
+  },
+  errorText: {
+    color: '#ff3333',
+    marginBottom: 10,
+    fontWeight: 'bold',
   },
 });

@@ -37,6 +37,7 @@ export default function TabLayout() {
                 name="home"
                 options={{
                     title: 'Home',
+                    headerShown: false,
                     tabBarIcon: ({ color, size }) => <Entypo name="home" size={size} color={color} />,
                 }}
             />
@@ -44,7 +45,6 @@ export default function TabLayout() {
                 name="ubs"
                 options={{
                     title: 'UBS',
-                    headerShown: false,
                     tabBarIcon: ({ color, size }) => <FontAwesome6 name="hospital" size={size} color={color} />
                 }}
             />
@@ -73,6 +73,15 @@ export default function TabLayout() {
                 name="about"
                 options={{
                     title: "Sobre",
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => <Octicons name="question" size={size} color={color} />
+                }}
+            />
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: "index",
+                    href: null,
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => <Octicons name="question" size={size} color={color} />
                 }}
