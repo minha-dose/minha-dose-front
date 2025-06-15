@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "minha-dose",
-    "slug": "minha-dose",
+    "name": "minha-dose-front-copy",
+    "slug": "minha-dose-front-copy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.joycebarbosag.minhadose"
+      "bundleIdentifier": "com.joycebarbosag.minhadosefrontcopy"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.joycebarbosag.minhadose"
+      "package": "com.joycebarbosag.minhadosefrontcopy"
     },
     "web": {
       "bundler": "metro",
@@ -42,12 +42,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": "1de128ca-d79e-4cea-91d6-504ab4eb858d"
+        "projectId": "9307db7f-2f07-4c70-9554-c07f74ee1256"
       }
     },
     "owner": "joycebarbosag",
     "updates": {
-      "url": "https://u.expo.dev/1de128ca-d79e-4cea-91d6-504ab4eb858d"
+      "url": "https://u.expo.dev/9307db7f-2f07-4c70-9554-c07f74ee1256"
     },
     "runtimeVersion": {
       "policy": "appVersion"

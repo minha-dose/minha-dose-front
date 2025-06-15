@@ -1,5 +1,8 @@
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
+import { useUserStore } from '../../store/useUserStore';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
@@ -10,10 +13,28 @@ const images = [
 ];
 
 export default function Home() {
+  const user = useUserStore((state) => state.user);
+  const [name, setName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    async function fetchName() {
+      try {
+        const response = await axios.get(`https://minha-dose-express-copy-nine.vercel.app/api/v1/users/${user.id}`);
+        setName(response.data.name);
+      } catch (error) {
+        console.error('Erro ao buscar nome do usuário:', error);
+      }
+    }
+
+    fetchName();
+  }, [user?.id]);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.welcomeText}>Olá, Mariana!</Text>
+        <Text style={styles.welcomeText}>Olá, {name || 'Usuário'}!</Text>
       </View>
 
       <View style={styles.content}>

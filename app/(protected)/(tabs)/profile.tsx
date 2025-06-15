@@ -1,6 +1,8 @@
 import { globalStyles } from "@/styles/globalStyle";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useUserStore } from "../../store/useUserStore";
+import SuccessModal from '../../../components/SuccessModal';
+import { useRouter } from 'expo-router';
 import React, { useState, useEffect, useRef } from "react";
 import {
     Image,
@@ -15,7 +17,8 @@ import {
     Alert,
 } from "react-native";
 import axios from "axios";
- 
+
+
 const avatarOptions = [
     require("@/assets/images/avatar/choose-avatar.png"),
     require("@/assets/images/avatar/mulher-1.jpg"),
@@ -23,11 +26,12 @@ const avatarOptions = [
     require("@/assets/images/avatar/homem-1.jpg"),
     require("@/assets/images/avatar/homem-2.png")
 ];
- 
+
 export default function Profile() {
+    const router = useRouter();
     const { user } = useUserStore();
     const userId = user?.id;
- 
+
     const [selectedAvatar, setSelectedAvatar] = useState(avatarOptions[0]);
     const [showOptions, setShowOptions] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -44,31 +48,31 @@ export default function Profile() {
     const [userCity, setUserCity] = useState("");
     const [userBrazilianState, setUserBrazilianState] = useState("");
     const [userZipCode, setUserZipCode] = useState("");
-    const [userCountry, setUserCountry] = useState(""); 
- 
+    const [userCountry, setUserCountry] = useState("");
+    const [modalVisible, setModalVisible] = useState(false);
+
     const roleRef = useRef("");
     const passwordRef = useRef("");
- 
+
     const toggleOptions = () => setShowOptions(!showOptions);
     const selectAvatar = (avatar: any) => {
         setSelectedAvatar(avatar);
         setShowOptions(false);
     };
- 
+
     useEffect(() => {
         if (!userId) {
             setError("Usuário não autenticado.");
             return;
         }
- 
+
         const fetchUserData = async () => {
             setLoading(true);
             setError(null);
             try {
                 const response = await axios.get(`https://minha-dose-express-copy-nine.vercel.app/api/v1/users/${userId}`);
                 const data = response.data;
-                console.log("Dados retornados da API:", data);
- 
+
                 setUserName(data.name || "");
                 setUserEmail(data.email || "");
                 setUserAge(data.age || null);
@@ -80,10 +84,10 @@ export default function Profile() {
                 setUserBrazilianState(data.address?.district || "");
                 setUserZipCode(data.address?.zipCode || "");
                 setUserCountry(data.address?.country || "");
- 
+
                 roleRef.current = data.role || "";
                 passwordRef.current = data.password || "";
- 
+
             } catch (err) {
                 setError("Erro ao carregar os dados do usuário.");
                 console.error(err);
@@ -91,19 +95,19 @@ export default function Profile() {
                 setLoading(false);
             }
         };
- 
+
         fetchUserData();
     }, [userId]);
- 
+
     const handleSave = async () => {
         if (!userId) {
             Alert.alert("Erro", "Usuário não autenticado.");
             return;
         }
- 
+
         setLoading(true);
         setError(null);
- 
+
         const updatedUser = {
             name: userName,
             email: userEmail,
@@ -112,26 +116,22 @@ export default function Profile() {
             password: passwordRef.current,
             contact: {
                 phone: userPhone,
-                email: userEmail, 
+                email: userEmail,
             },
             address: {
                 street: userStreet,
                 neighborhood: userNeighborhood,
                 extraInfo: userHouseNumber,
                 city: userCity,
-                district: userBrazilianState, 
+                district: userBrazilianState,
                 country: userCountry,
                 zipCode: userZipCode,
             }
         };
-        console.log("curl: ", updatedUser);
- 
         try {
             const response = await axios.put(`https://minha-dose-express-copy-nine.vercel.app/api/v1/users/${userId}`, updatedUser);
-            console.log("Resposta da API:", response.data);
-            console.log("status: ", response.status);
-			setIsEditing(false);
-            console.log("Sucesso", "Dados atualizados com sucesso!");
+            setIsEditing(false);
+            setModalVisible(true);
         } catch (err) {
             setError("Erro ao salvar os dados.");
             console.error(err);
@@ -140,7 +140,7 @@ export default function Profile() {
             setLoading(false);
         }
     };
- 
+
     if (loading) {
         return (
             <View style={[globalStyles.profileContainer, { justifyContent: "center", alignItems: "center" }]}>
@@ -148,7 +148,7 @@ export default function Profile() {
             </View>
         );
     }
- 
+
     if (error) {
         return (
             <View style={[globalStyles.profileContainer, { justifyContent: "center", alignItems: "center" }]}>
@@ -156,14 +156,23 @@ export default function Profile() {
             </View>
         );
     }
- 
+
     return (
+
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <ScrollView
                 style={globalStyles.profileContainer}
                 contentContainerStyle={{ paddingBottom: 60 }}
                 keyboardShouldPersistTaps="handled"
             >
+                <SuccessModal
+                    visible={modalVisible}
+                    onClose={() => {
+                        setModalVisible(false);
+                        router.push('/profile');
+                    }}
+                    message="Dados atualizados com sucesso!"
+                />
                 <View style={globalStyles.register}>
                     <Text style={{ fontSize: 24, fontWeight: "bold" }}>Meu cadastro</Text>
                     <FontAwesome5
@@ -173,12 +182,12 @@ export default function Profile() {
                         onPress={() => setIsEditing(true)}
                     />
                 </View>
- 
+
                 <View style={globalStyles.profileHorizontalContainer}>
                     <TouchableOpacity onPress={toggleOptions}>
                         <Image source={selectedAvatar} style={globalStyles.profileAvatar} />
                     </TouchableOpacity>
- 
+
                     {showOptions && (
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={globalStyles.optionsAvatarContainer}>
                             {avatarOptions.map((avatar, index) => (
@@ -194,7 +203,7 @@ export default function Profile() {
                             ))}
                         </ScrollView>
                     )}
- 
+
                     <View style={globalStyles.profileInputsHorizontalContainer}>
                         {isEditing ? (
                             <TextInput
@@ -208,7 +217,7 @@ export default function Profile() {
                         )}
                     </View>
                 </View>
- 
+
                 <View style={{ marginTop: 40 }}>
                     <Text>E-mail</Text>
                     {isEditing ? (
@@ -221,7 +230,7 @@ export default function Profile() {
                     ) : (
                         <Text style={globalStyles.staticInputProfile}>{userEmail}</Text>
                     )}
- 
+
                     <View style={globalStyles.profileInputSideBySide}>
                         <View style={globalStyles.profileInputHalf}>
                             <Text>Idade</Text>
@@ -236,7 +245,7 @@ export default function Profile() {
                                 <Text style={globalStyles.staticInputProfile}>{userAge}</Text>
                             )}
                         </View>
- 
+
                         <View style={globalStyles.profileInputHalf}>
                             <Text>Telefone</Text>
                             {isEditing ? (
@@ -250,7 +259,7 @@ export default function Profile() {
                             )}
                         </View>
                     </View>
- 
+
                     <View style={globalStyles.profileInputSideBySide}>
                         <View style={globalStyles.profileInputHalf}>
                             <Text>Rua</Text>
@@ -265,20 +274,20 @@ export default function Profile() {
                             )}
                         </View>
                         <View style={globalStyles.profileInputHalf}>
-<Text>Número</Text>
+                            <Text>Número</Text>
                             {isEditing ? (
-<TextInput
+                                <TextInput
                                     style={globalStyles.profileInputHorizontal}
                                     value={userHouseNumber !== null ? String(userHouseNumber) : ""}
                                     onChangeText={(text) => setUserHouseNumber((text))}
                                     keyboardType="numeric"
                                 />
                             ) : (
-<Text style={globalStyles.staticInputProfile}>{userHouseNumber}</Text>
+                                <Text style={globalStyles.staticInputProfile}>{userHouseNumber}</Text>
                             )}
-</View>
+                        </View>
                     </View>
- 
+
                     <View style={globalStyles.profileInputSideBySide}>
                         <View style={globalStyles.profileInputHalf}>
                             <Text>CEP</Text>
@@ -305,7 +314,7 @@ export default function Profile() {
                             )}
                         </View>
                     </View>
- 
+
                     <View style={globalStyles.profileInputSideBySide}>
                         <View style={globalStyles.profileInputHalf}>
                             <Text>Cidade</Text>
@@ -332,7 +341,7 @@ export default function Profile() {
                             )}
                         </View>
                     </View>
- 
+
                     <View style={{ marginTop: 20 }}>
                         <Text>País</Text>
                         {isEditing ? (
@@ -347,7 +356,7 @@ export default function Profile() {
                         )}
                     </View>
                 </View>
- 
+
                 {isEditing && (
                     <TouchableOpacity
                         onPress={handleSave}

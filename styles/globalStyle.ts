@@ -112,11 +112,9 @@ export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#002C5F',
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 20,
   },
-  input: {
+  cadastroInput: {
     width: '100%',
     height: 50,
     borderColor: '#fff',
@@ -140,11 +138,23 @@ export const globalStyles = StyleSheet.create({
   },
   footerText: {
     marginTop: 16,
+    padding: 10,
+    marginButton: 20,
     color: '#fff',
+  },
+  cadastroCenterView: {
+    alignItems: 'center',
+    marginTop: 20
   },
   link: {
     fontWeight: 'bold',
     color: '#fff',
+  },
+  cadastroIntro: {
+    color: '#fff',
+    fontSize: 20,
+    marginTop: 30,
+    marginBottom: 30,
   },
   logo: {
     fontSize: 28,

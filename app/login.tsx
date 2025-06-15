@@ -3,7 +3,7 @@ import axios from 'axios';
 import logo from '@/assets/images/logo/minha-dose-logo.png';
 import { useRouter } from 'expo-router';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useUserStore } from './store/useUserStore'; // ajuste o caminho conforme seu projeto
+import { useUserStore } from './store/useUserStore';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -144,5 +144,5 @@ const styles = StyleSheet.create({
     color: '#ff3333',
     marginBottom: 10,
     fontWeight: 'bold',
-  },
+  }
 });

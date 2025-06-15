@@ -8,7 +8,6 @@ import { Tabs } from 'expo-router';
 import { TouchableOpacity } from "react-native";
 import { ThemeContext } from "./theme/ThemeContext";
 
-// Botão de alternância de tema
 function ThemeToggleButton() {
     const { theme, toggleTheme } = useContext(ThemeContext);
     return (
@@ -23,7 +22,7 @@ function ThemeToggleButton() {
 }
 
 export default function TabLayout() {
-    const { theme } = useContext(ThemeContext);
+    const { theme } = useContext(ThemeContext);    
 
     return (
         <Tabs screenOptions={{
