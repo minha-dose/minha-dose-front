@@ -19,7 +19,7 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'center'
   },
   about: {
-    height: "43%",
+    height: "50%",
     width: "80%",
     marginTop: 20,
     padding: 20,

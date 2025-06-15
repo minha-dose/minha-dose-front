@@ -1,36 +1,20 @@
-import React, { useContext } from "react";
+import React from "react";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Octicons from '@expo/vector-icons/Octicons';
 import { Tabs } from 'expo-router';
-import { TouchableOpacity } from "react-native";
-import { ThemeContext } from "./theme/ThemeContext";
-
-function ThemeToggleButton() {
-    const { theme, toggleTheme } = useContext(ThemeContext);
-    return (
-        <TouchableOpacity onPress={toggleTheme} style={{ marginRight: 16 }}>
-            <Ionicons
-                name={theme.background === "#181A20" ? "sunny" : "moon"}
-                size={24}
-                color={theme.icon}
-            />
-        </TouchableOpacity>
-    );
-}
 
 export default function TabLayout() {
-    const { theme } = useContext(ThemeContext);    
-
     return (
         <Tabs screenOptions={{
-            tabBarActiveTintColor: theme.primary,
-            headerStyle: { backgroundColor: theme.navBar },
-            headerTintColor: theme.icon,
-            tabBarStyle: { backgroundColor: theme.background },
-            headerRight: () => <ThemeToggleButton />
+            tabBarActiveTintColor: "#083474",
+            headerStyle: { backgroundColor: "#083474" },
+            headerTintColor: "#fff",
+            tabBarStyle: {
+                backgroundColor: '#FAFAFA'
+            }
         }}>
             <Tabs.Screen
                 name="home"
