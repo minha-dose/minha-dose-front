@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, View, Text, TouchableOpacity } from 'react-native';
-import { globalStyles } from '../styles/globalStyle';
+import { Modal, Text, TouchableOpacity, View } from 'react-native';
+import { globalStyles } from '../global';
 
 type SuccessModalProps = {
   visible: boolean;

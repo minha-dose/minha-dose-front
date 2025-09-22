@@ -1,15 +1,15 @@
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import { useUserStore } from '../../store/useUserStore';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
 const images = [
-  require("@/assets/images/campaings/covid.jpeg"),
-  require("@/assets/images/campaings/sarampo.png"),
-  require("@/assets/images/campaings/hpv.jpeg"),
+  require("../../../assets/images/splash-icon.png"),
+  require("../../../assets/images/splash-icon.png"),
+  require("../../../assets/images/splash-icon.png"),
 ];
 
 export default function Home() {
@@ -19,14 +19,16 @@ export default function Home() {
   useEffect(() => {
     if (!user?.id) return;
 
-    async function fetchName() {
+    const fetchName = async () => {
       try {
-        const response = await axios.get(`https://minha-dose-express-copy-nine.vercel.app/api/v1/users/${user.id}`);
+        const response = await axios.get(
+          `https://minha-dose-back-s6ae.onrender.com/api/v1/users/${user.id}`
+        );
         setName(response.data.name);
       } catch (error) {
         console.error('Erro ao buscar nome do usuário:', error);
       }
-    }
+    };
 
     fetchName();
   }, [user?.id]);
@@ -34,6 +36,7 @@ export default function Home() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+        {/* Operador de encadeamento opcional evita erro de null */}
         <Text style={styles.welcomeText}>Olá, {name || 'Usuário'}!</Text>
       </View>
 
@@ -54,11 +57,11 @@ export default function Home() {
           loop
           width={width}
           height={200}
-          autoPlay={true}
+          autoPlay
           data={images}
           scrollAnimationDuration={1000}
-          renderItem={({ item }) => (
-            <Image source={item} style={styles.image} resizeMode="contain" />
+          renderItem={({ item, index }) => (
+            <Image key={index} source={item} style={styles.image} resizeMode="contain" />
           )}
         />
       </View>

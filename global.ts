@@ -139,7 +139,7 @@ export const globalStyles = StyleSheet.create({
   footerText: {
     marginTop: 16,
     padding: 10,
-    marginButton: 20,
+    marginBottom: 20,
     color: '#fff',
   },
   cadastroCenterView: {

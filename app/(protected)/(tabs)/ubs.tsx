@@ -1,16 +1,16 @@
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useEffect, useState } from "react";
 import {
-  FlatList,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
+    ActivityIndicator,
+    FlatList,
+    Modal,
+    Pressable,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import api from '@/services/api'; 
+import api from '../../../api/api';
 
 export default function Ubs() {
   const [ubsList, setUbsList] = useState([]);

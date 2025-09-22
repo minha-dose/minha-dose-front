@@ -1,20 +1,18 @@
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  Dimensions, // Para pegar a largura da tela
+    Dimensions,
+    FlatList,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons"; // Ícone de caneta e vacinas
-import { useRouter } from "expo-router"; // Para navegação
-import { globalStyles } from "../styles/globalStyle"; // Assumindo que você tem um globalStyle.ts na pasta 'styles'
 
 const { width } = Dimensions.get('window');
 
-// Dados de exemplo para as vacinas (você pode expandir isso com mais detalhes)
 const vaccineData = [
   {
     id: "1",
@@ -56,7 +54,7 @@ const vaccineData = [
     name: "Zika",
     description: "Protege contra o vírus Zika.",
     technicalDetails: "Atualmente, não há vacina licenciada para o vírus Zika. Prevenção é baseada no controle do mosquito.",
-    ubsAvailable: [], // Não disponível em UBS, para demonstrar o caso
+    ubsAvailable: [],
   },
 ];
 

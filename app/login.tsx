@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
 import axios from 'axios';
-import logo from '@/assets/images/logo/minha-dose-logo.png';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import logo from '../assets/images/logo/minha-dose-logo.jpeg';
 import { useUserStore } from './store/useUserStore';
+
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function LoginScreen() {
 
     try {
       const response = await axios.get(
-        `https://minha-dose-express-copy-nine.vercel.app/api/v1/users/email?email=${encodeURIComponent(email)}`
+        `https://minha-dose-back-s6ae.onrender.com/api/users/email?email=${encodeURIComponent(email)}`
       );
 
       const userData = response.data;

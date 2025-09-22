@@ -1,19 +1,19 @@
+import axios from 'axios';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    View,
-    TextInput,
-    TouchableOpacity,
-    Text,
-    ScrollView,
+    Keyboard,
     KeyboardAvoidingView,
     Platform,
-    Keyboard,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
     TouchableWithoutFeedback,
+    View,
 } from 'react-native';
-import { globalStyles } from '../styles/globalStyle';
 import SuccessModal from '../components/SuccessModal';
-import { useRouter } from 'expo-router';
-import axios from 'axios';
+import { globalStyles } from '../global';
 
 export default function CadastroScreen() {
     const [modalVisible, setModalVisible] = useState(false);
@@ -60,7 +60,7 @@ export default function CadastroScreen() {
         };
 
         try {
-            const response = await axios.post('https://minha-dose-express-copy-nine.vercel.app/api/v1/users/', data);
+            const response = await axios.post('https://minha-dose-back-s6ae.onrender.com/api/v1/users/', data);
             if (response.status === 201 || response.status === 200) {
                 setModalVisible(true);
             } else {
