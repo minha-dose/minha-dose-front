@@ -21,6 +21,7 @@ export default function CadastroSecondScreen() {
     const router = useRouter();
 
     const { email, phoneNumber, setField } = useUserDataStore();
+    console.log('Email no store:', email);
     const allFieldsFilled = email.trim().length > 0 && phoneNumber.trim().length > 0;
 
     return (
@@ -42,7 +43,7 @@ export default function CadastroSecondScreen() {
                         <Text style={globalStyles.cadastroSubTitle}>Para fornecer o melhor serviço possível, todos os dados solicitados abaixo devem ser informados.</Text>
                     </View>
 
-                    <TextInput placeholder="E-mail" placeholderTextColor="#022757" style={globalStyles.cadastroInput} value={email} onChangeText={(text)=> setField('email', text)} />
+                    <TextInput placeholder="E-mail" placeholderTextColor="#022757" style={globalStyles.cadastroInput} value={email} onChangeText={(text)=> setField('email', text)} editable={false}/>
                     <TextInput placeholder="Telefone celular" placeholderTextColor="#022757" style={globalStyles.cadastroInput} value={phoneNumber} onChangeText={(text) => setField('phoneNumber', text)} />
                     
                     <View style={globalStyles.buttonContainer}>

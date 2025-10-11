@@ -4,6 +4,7 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 import api from '../api/api';
 import logo from '../assets/images/logo/minha-dose-logo.jpeg';
 import { useUserStore } from './store/useUserStore';
+import { useUserDataStore } from './store/userDataStore';
 
 type User = {
   id: number;
@@ -13,8 +14,9 @@ type User = {
 
 export default function LoginScreen() {
   const router = useRouter();
-  const setUser = useUserStore((state) => state.setUser);
 
+  const setUserDataEmail = useUserDataStore((state) => state.setField);
+  const setUser = useUserStore((state) => state.setUser);
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState('');
@@ -33,12 +35,9 @@ async function handleVerifyEmail() {
       setVerifiedEmail(true);
     }
   } catch (e: any) {
-    console.log('Erro completo no handleVerifyEmail:', e);
-    console.log('e.response.status:', e.response?.status);
-    console.log('e.response.data:', e.response?.data);
 
-    // Correção aqui — agora usando 404
     if (e.response && e.response.status === 404) {
+      setUserDataEmail('email', email);
       router.push({
         pathname: '/loadingPage',
         params: { next: '/cadastro' },
