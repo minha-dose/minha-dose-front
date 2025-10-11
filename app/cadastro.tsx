@@ -1,7 +1,8 @@
-import axios from 'axios';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import {
+    Image,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
@@ -10,65 +11,59 @@ import {
     TextInput,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    View,
+    View
 } from 'react-native';
-import SuccessModal from '../components/SuccessModal';
+import logo from '../assets/images/logo/minha-dose-logo.png';
 import { globalStyles } from '../global';
+import { useUserDataStore } from './store/userDataStore';
 
 export default function CadastroScreen() {
-    const [modalVisible, setModalVisible] = useState(false);
+
+    const {
+        cpf,
+        name,
+        age,
+        zipCode,
+        address,
+        city,
+        neighborhood,
+        district,
+        country,
+        houseNumber,
+        setField
+    } = useUserDataStore();
+
     const router = useRouter();
 
-    const [name, setName] = useState('');
-    const [age, setAge] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [street, setStreet] = useState('');
-    const [city, setCity] = useState('');
-    const [district, setDistrict] = useState('');
-    const [neighborhood, setNeighborhood] = useState('');
-    const [zipCode, setZipCode] = useState('');
-    const [houseNumber, setHouseNumber] = useState('');
-    const [country, setCountry] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showDatePicker, setShowDatePicker] = React.useState(false);
+    const [localBirthDate, setLocalBirthDate] = React.useState(
+        age ? new Date(age) : new Date()
+    );
 
-    const handleRegister = async () => {
-        if (password !== confirmPassword) {
-            alert('As senhas não coincidem!');
-            return;
-        }
+    const allFieldsFilled =
+        cpf.trim().length > 0 &&
+        name.trim().length > 0 &&
+        zipCode.trim().length > 0 &&
+        address.trim().length > 0 &&
+        city.trim().length > 0 &&
+        neighborhood.trim().length > 0 &&
+        district.trim().length > 0 &&
+        houseNumber.trim().length > 0 &&
+        country.trim().length > 0 &&
+        age.length > 0; 
 
-        const data = {
-            name,
-            password,
-            email,
-            age: Number(age),
-            role: 'user',
-            address: {
-                street,
-                city,
-                district,
-                neighborhood,
-                country,
-                zipCode,
-            },
-            contact: {
-                phone,
-                email,
-            },
-        };
+    const handleDateChange = (event: any, selectedDate?: Date) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            setLocalBirthDate(selectedDate);
 
-        try {
-            const response = await axios.post('https://minha-dose-back-s6ae.onrender.com/api/v1/users/', data);
-            if (response.status === 201 || response.status === 200) {
-                setModalVisible(true);
-            } else {
-                alert('Erro ao cadastrar. Tente novamente.');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Erro ao cadastrar. Verifique sua conexão e tente novamente.');
+            const year = selectedDate.getFullYear();
+
+            const currentYear = new Date().getFullYear();
+            const userBirthdayYear = `${year}`;
+            const userAge = (currentYear - Number(userBirthdayYear)).toString();
+ 
+            setField('age', userAge);
         }
     };
 
@@ -83,45 +78,124 @@ export default function CadastroScreen() {
                     contentContainerStyle={{ padding: 16 }}
                     keyboardShouldPersistTaps="handled"
                 >
-                    <View style={globalStyles.cadastroCenterView}>
+                    <View>
+                        <Image source={logo} style={globalStyles.smallLogo} />
                         <Text style={globalStyles.cadastroIntro}>
-                            Preencha os campos abaixo para cadastrar-se na plataforma:
+                            Informe os seus dados pessoais
+                        </Text>
+                        <Text style={globalStyles.cadastroSubTitle}>
+                            Para fornecer o melhor serviço possível, todos os dados solicitados abaixo devem ser informados.
                         </Text>
                     </View>
 
-                    <TextInput placeholder="Nome" style={globalStyles.cadastroInput} value={name} onChangeText={setName} />
-                    <TextInput placeholder="Idade" style={globalStyles.cadastroInput} value={age} onChangeText={setAge} keyboardType="numeric" />
-                    <TextInput placeholder="E-mail" style={globalStyles.cadastroInput} value={email} onChangeText={setEmail} keyboardType="email-address" />
-                    <TextInput placeholder="Telefone" style={globalStyles.cadastroInput} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-                    <TextInput placeholder="Rua" style={globalStyles.cadastroInput} value={street} onChangeText={setStreet} />
-                    <TextInput placeholder="Cidade" style={globalStyles.cadastroInput} value={city} onChangeText={setCity} />
-                    <TextInput placeholder="Bairro" style={globalStyles.cadastroInput} value={neighborhood} onChangeText={setNeighborhood} />
-                    <TextInput placeholder="Estado" style={globalStyles.cadastroInput} value={district} onChangeText={setDistrict} />
-                    <TextInput placeholder="CEP" style={globalStyles.cadastroInput} value={zipCode} onChangeText={setZipCode} keyboardType="numeric" />
-                    <TextInput placeholder="N. da casa" style={globalStyles.cadastroInput} value={houseNumber} onChangeText={setHouseNumber} keyboardType="numeric" />
-                    <TextInput placeholder="País" style={globalStyles.cadastroInput} value={country} onChangeText={setCountry} />
-                    <TextInput placeholder="Senha" secureTextEntry style={globalStyles.cadastroInput} value={password} onChangeText={setPassword} />
-                    <TextInput placeholder="Confirmar senha" secureTextEntry style={globalStyles.cadastroInput} value={confirmPassword} onChangeText={setConfirmPassword} />
-
-                    <View style={globalStyles.cadastroCenterView}>
-                        <TouchableOpacity style={globalStyles.button} onPress={handleRegister}>
-                            <Text style={globalStyles.buttonText}>Cadastrar</Text>
-                        </TouchableOpacity>
-
-                        <Text style={globalStyles.footerText}>
-                            Já possui cadastro?
-                            <Text onPress={() => router.push('/login')} style={globalStyles.link}> Logar</Text>
-                        </Text>
-                    </View>
-
-                    <SuccessModal
-                        visible={modalVisible}
-                        onClose={() => {
-                            setModalVisible(false);
-                            router.push('/login');
-                        }}
-                        message="Cadastro realizado com sucesso!"
+                    <TextInput
+                        placeholder="CPF"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={cpf}
+                        onChangeText={(text) => setField('cpf', text)}
                     />
+
+                    <TextInput
+                        placeholder="Nome Completo"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={name}
+                        onChangeText={(text) => setField('name', text)}
+                    />
+
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                        <TextInput
+                            placeholder="Data de Nascimento"
+                            placeholderTextColor="#022757"
+                            style={globalStyles.cadastroInput}
+                            value={localBirthDate.toLocaleDateString('pt-BR')}
+                            editable={false}
+                            pointerEvents="none"
+                        />
+                    </TouchableOpacity>
+
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={localBirthDate}
+                            mode="date"
+                            display="default"
+                            onChange={handleDateChange}
+                            maximumDate={new Date()}
+                        />
+                    )}
+
+                    <TextInput
+                        placeholder="CEP"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={zipCode}
+                        onChangeText={(text) => setField('zipCode', text)}
+                        keyboardType="numeric"
+                    />
+                    <TextInput
+                        placeholder="Endereço"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={address}
+                        onChangeText={(text) => setField('address', text)}
+                    />
+                    <TextInput
+                        placeholder="Cidade"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={city}
+                        onChangeText={(text) => setField('city', text)}
+                    />
+                    <TextInput
+                        placeholder="Bairro"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={neighborhood}
+                        onChangeText={(text) => setField('neighborhood', text)}
+                    />
+                    <TextInput
+                        placeholder="Estado"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={district}
+                        onChangeText={(text) => setField('district', text)}
+                    />
+                    <TextInput
+                        placeholder="País"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={country}
+                        onChangeText={(text) => setField('country', text)}
+                    />
+                    <TextInput
+                        placeholder="N. da casa"
+                        placeholderTextColor="#022757"
+                        style={globalStyles.cadastroInput}
+                        value={houseNumber}
+                        onChangeText={(text) => setField('houseNumber', text)}
+                        keyboardType="numeric"
+                    />
+
+                    <View style={globalStyles.buttonContainer}>
+                        <TouchableOpacity
+                            style={[globalStyles.buttonCadastro, globalStyles.backButton]}
+                            onPress={() => router.push('/login')}
+                        >
+                            <Text style={globalStyles.buttonCadastroText}>Voltar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                globalStyles.buttonCadastro,
+                                globalStyles.continueButton,
+                                !allFieldsFilled && { backgroundColor: '#ccc' }
+                            ]}
+                            onPress={() => router.push('/cadastro-second')}
+                            disabled={!allFieldsFilled}
+                        >
+                            <Text style={globalStyles.buttonCadastroText}>Continuar</Text>
+                        </TouchableOpacity>
+                    </View>
                 </ScrollView>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>

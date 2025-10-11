@@ -1,10 +1,15 @@
-import axios from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import api from '../api/api';
 import logo from '../assets/images/logo/minha-dose-logo.jpeg';
 import { useUserStore } from './store/useUserStore';
 
+type User = {
+  id: number;
+  email: string;
+  password: string;
+};
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -13,27 +18,51 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState('');
+  const [verifiedEmail, setVerifiedEmail] = useState(false);
+  const [userFound, setUserFound] = useState<User | null>(null);
+
+async function handleVerifyEmail() {
+  setError('');
+
+  try {
+    const response = await api.get(`api/v1/users/email?email=${encodeURIComponent(email)}`);
+    const userData: User = response.data;
+
+    if (userData) {
+      setUserFound(userData);
+      setVerifiedEmail(true);
+    }
+  } catch (e: any) {
+    console.log('Erro completo no handleVerifyEmail:', e);
+    console.log('e.response.status:', e.response?.status);
+    console.log('e.response.data:', e.response?.data);
+
+    // Correção aqui — agora usando 404
+    if (e.response && e.response.status === 404) {
+      router.push({
+        pathname: '/loadingPage',
+        params: { next: '/cadastro' },
+      });
+    } else {
+      setError('Erro ao verificar e-mail.');
+    }
+  }
+}
 
   async function handleLogin() {
     setError('');
 
-    try {
-      const response = await axios.get(
-        `https://minha-dose-back-s6ae.onrender.com/api/users/email?email=${encodeURIComponent(email)}`
-      );
+    if (!userFound) {
+      setError('Usuário não carregado. Tente novamente.');
+      return;
+    }
 
-      const userData = response.data;
-
-      if (userData && userData.password === senha) {
-        const { password, ...userWithoutPassword } = userData;
-        setUser(userWithoutPassword);
-
-        router.push('/home');
-      } else {
-        setError('Senha ou usuário incorretos.');
-      }
-    } catch (e) {
-      setError('Senha ou usuário incorretos.');
+    if (userFound.password === senha) {
+      const { password, ...userWithoutPassword } = userFound;
+      setUser(userWithoutPassword);
+      router.push('/home');
+    } else {
+      setError('Senha incorreta.');
     }
   }
 
@@ -54,19 +83,27 @@ export default function LoginScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        <TextInput
-          placeholder="Senha"
-          placeholderTextColor="#fff"
-          secureTextEntry
-          style={styles.input}
-          value={senha}
-          onChangeText={setSenha}
-        />
+
+        {verifiedEmail && (
+          <TextInput
+            placeholder="Senha"
+            placeholderTextColor="#fff"
+            style={styles.input}
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry
+          />
+        )}
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={verifiedEmail ? handleLogin : handleVerifyEmail}
+        >
+          <Text style={styles.buttonText}>
+            {verifiedEmail ? 'Entrar' : 'Continuar'}
+          </Text>
         </TouchableOpacity>
 
         <Text style={styles.footerText}>
