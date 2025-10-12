@@ -3,6 +3,7 @@ import { create } from "zustand";
 interface User {
   id: number;
   email: string;
+  role: "admin" | "user";
 }
 
 interface UserState {

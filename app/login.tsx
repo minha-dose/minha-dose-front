@@ -10,6 +10,7 @@ type User = {
   id: number;
   email: string;
   password: string;
+  role: 'user' | 'admin';
 };
 
 export default function LoginScreen() {
@@ -29,6 +30,8 @@ async function handleVerifyEmail() {
   try {
     const response = await api.get(`api/v1/users/email?email=${encodeURIComponent(email)}`);
     const userData: User = response.data;
+
+    console.log("API response userData:", userData);
 
     if (userData) {
       setUserFound(userData);
@@ -57,11 +60,26 @@ async function handleVerifyEmail() {
     }
 
     if (userFound.password === senha) {
-      const { password, ...userWithoutPassword } = userFound;
-      setUser(userWithoutPassword);
-      router.push('/home');
+      try {
+        // Busca dados completos do usuário incluindo role
+        const response = await api.get(`api/v1/users/${userFound.id}`);
+        const fullUserData = response.data;
+
+        const { password, ...userWithoutPassword } = fullUserData;
+        setUser(userWithoutPassword);
+
+        // Redireciona conforme o role
+        if (fullUserData.role === "admin") {
+          router.replace("/(protected)/(admin)/profile");
+        } else {
+          router.replace("/(protected)/(tabs)/home");
+        }
+      } catch (e) {
+        console.error('Erro ao buscar dados do usuário:', e);
+        setError('Erro ao fazer login. Tente novamente.');
+      }
     } else {
-      setError('Senha incorreta.');
+      setError("Senha incorreta.");
     }
   }
 
