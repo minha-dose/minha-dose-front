@@ -63,9 +63,10 @@ export default function AdminProfile() {
           </View>
 
           <View style={styles.actionIcons}>
-            <TouchableOpacity>
-              <Ionicons name="settings-sharp" size={20} color="#083474" />
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/(protected)/(admin)/settings")}>
+  <Ionicons name="settings-sharp" size={20} color="#083474" />
+</TouchableOpacity>
+
             <TouchableOpacity style={{ marginLeft: 10 }}>
               <MaterialIcons name="edit" size={20} color="#083474" />
             </TouchableOpacity>
