@@ -27,14 +27,16 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="ubs"
                 options={{
-                    title: 'UBS',
+                    tabBarLabel: 'UBS',
+                    headerTitle: 'Unidades Básicas de Saúde (UBSs)',
                     tabBarIcon: ({ color, size }) => <FontAwesome6 name="hospital" size={size} color={color} />
                 }}
             />
             <Tabs.Screen
                 name="vaccincard"
                 options={{
-                    title: 'Meu cartão',
+                    tabBarLabel: 'Meu Cartão',
+                    headerTitle: 'Cartão de Vacina SUS',
                     tabBarIcon: ({ color, size }) => <Octicons name="checklist" size={size} color={color} />
                 }}
             />
@@ -50,14 +52,6 @@ export default function TabLayout() {
                 options={{
                     title: "Perfil",
                     tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" size={size} color={color} />
-                }}
-            />
-            <Tabs.Screen
-                name="about"
-                options={{
-                    title: "Sobre",
-                    headerShown: false,
-                    tabBarIcon: ({ color, size }) => <Octicons name="question" size={size} color={color} />
                 }}
             />
             <Tabs.Screen

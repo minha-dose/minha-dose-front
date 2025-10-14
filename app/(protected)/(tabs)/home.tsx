@@ -1,7 +1,7 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
+import api from '../../../api/api';
 import { useUserStore } from '../../store/useUserStore';
 
 const { width } = Dimensions.get('window');
@@ -21,9 +21,7 @@ export default function Home() {
 
     const fetchName = async () => {
       try {
-        const response = await axios.get(
-          `https://minha-dose-back-s6ae.onrender.com/api/v1/users/${user.id}`
-        );
+        const response = await api.get(`api/v1/users/${encodeURIComponent(user.id)}`);
         setName(response.data.name);
       } catch (error) {
         console.error('Erro ao buscar nome do usuário:', error);
@@ -36,7 +34,6 @@ export default function Home() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        {/* Operador de encadeamento opcional evita erro de null */}
         <Text style={styles.welcomeText}>Olá, {name || 'Usuário'}!</Text>
       </View>
 

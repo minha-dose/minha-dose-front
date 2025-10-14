@@ -14,68 +14,55 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  aboutContainer: {
-    marginTop: 50,
-    alignItems: 'center'
-  },
-  about: {
-    height: "50%",
-    width: "80%",
-    marginTop: 20,
-    padding: 20,
-    borderRadius: 10,
-    backgroundColor: '#083474',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 5,
-      height: 5,
-    },
-    shadowOpacity: 0.35,
-    shadowRadius: 3.84,
-  },
-  aboutText: {
-    fontSize: 20,
-    textAlign: 'justify',
-    color: 'white',
-  },
-  connect: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 20,
-  },
   profileHorizontalContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    gap: 5,
     marginTop: 20,
   },
-  profileContainer: {
+  profileInput: {
     flex: 1,
-    padding: 16,
-    margin: 10,
-  },
-  profileInputsHorizontalContainer: {
-    flex: 1,
-    marginLeft: 12,
-    justifyContent: "center"
-  },
-  profileInputHorizontal: {
-    height: 30,
+    borderColor: '#E0E0E0',
+    fontSize: 12,
+    color: '#022757',
+    justifyContent: "center",
+    marginBottom: 30,
     marginTop: 5,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    fontSize: 15,
   },
-  profileInputSideBySide: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
+  profileRegularInput: {
     marginBottom: 10,
   },
-  profileInputHalf: {
+  profileLabel: {
+    color: '#022757',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  profileSideBySide: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 5,
+  },
+  profileColum:{
     flex: 1,
-    padding: 5
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  profileBtnUpdate: {
+    marginTop: 25,
+    backgroundColor: '#022757',
+    paddingVertical: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  profileUpdateBtnTxt:{
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  generalProfile: {
+    gap: 12,
   },
   profileAvatar: {
     width: 130,
