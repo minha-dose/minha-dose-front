@@ -9,8 +9,8 @@ import { useUserDataStore } from './store/userDataStore';
 type User = {
   id: number;
   email: string;
-  password: string;
-  role: 'user' | 'admin';
+  role?: string;
+  token?: string;
 };
 
 export default function LoginScreen() {
@@ -24,62 +24,60 @@ export default function LoginScreen() {
   const [verifiedEmail, setVerifiedEmail] = useState(false);
   const [userFound, setUserFound] = useState<User | null>(null);
 
-async function handleVerifyEmail() {
-  setError('');
+  async function handleVerifyEmail() {
+    setError('');
 
-  try {
-    const response = await api.get(`api/v1/users/email?email=${encodeURIComponent(email)}`);
-    const userData: User = response.data;
+    try {
+      const response = await api.get(`api/v1/users/email?email=${encodeURIComponent(email)}`);
+      const userData: User = response.data;
 
-    console.log("API response userData:", userData);
+      if (userData) {
+        setUserFound(userData);
+        setVerifiedEmail(true);
+      }
+    } catch (e: any) {
 
-    if (userData) {
-      setUserFound(userData);
-      setVerifiedEmail(true);
-    }
-  } catch (e: any) {
-
-    if (e.response && e.response.status === 404) {
-      setUserDataEmail('email', email);
-      router.push({
-        pathname: '/loadingPage',
-        params: { next: '/cadastro' },
-      });
-    } else {
-      setError('Erro ao verificar e-mail.');
+      if (e.response && e.response.status === 404) {
+        setUserDataEmail('email', email);
+        router.push({
+          pathname: '/loadingPage',
+          params: { next: '/cadastro' },
+        });
+      } else {
+        setError('Erro ao verificar e-mail.');
+      }
     }
   }
-}
 
   async function handleLogin() {
     setError('');
 
-    if (!userFound) {
-      setError('Usuário não carregado. Tente novamente.');
-      return;
-    }
+    try {
+      const response = await api.post(
+        '/api/v1/auth/login',
+        { email, password: senha },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
-    if (userFound.password === senha) {
-      try {
-        // Busca dados completos do usuário incluindo role
-        const response = await api.get(`api/v1/users/${userFound.id}`);
-        const fullUserData = response.data;
+      const { token } = response.data;
 
-        const { password, ...userWithoutPassword } = fullUserData;
-        setUser(userWithoutPassword);
-
-        // Redireciona conforme o role
-        if (fullUserData.role === "admin") {
-          router.replace("/(protected)/(admin)/profile");
-        } else {
-          router.replace("/(protected)/(tabs)/home");
-        }
-      } catch (e) {
-        console.error('Erro ao buscar dados do usuário:', e);
-        setError('Erro ao fazer login. Tente novamente.');
+      if (!token) {
+        setError('Falha ao autenticar usuário.');
+        return;
       }
-    } else {
-      setError("Senha incorreta.");
+
+      setUser({
+        ...userFound,
+        token,
+      } as any);
+
+      router.push('/home');
+    } catch (e: any) {
+      if (e.response?.status === 401) {
+        setError('Senha incorreta.');
+      } else {
+        setError('Erro ao realizar login.');
+      }
     }
   }
 
