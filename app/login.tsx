@@ -36,7 +36,6 @@ export default function LoginScreen() {
         setVerifiedEmail(true);
       }
     } catch (e: any) {
-
       if (e.response && e.response.status === 404) {
         setUserDataEmail('email', email);
         router.push({
@@ -100,14 +99,23 @@ export default function LoginScreen() {
         />
 
         {verifiedEmail && (
-          <TextInput
-            placeholder="Senha"
-            placeholderTextColor="#fff"
-            style={styles.input}
-            value={senha}
-            onChangeText={setSenha}
-            secureTextEntry
-          />
+          <>
+            <TextInput
+              placeholder="Senha"
+              placeholderTextColor="#fff"
+              style={styles.input}
+              value={senha}
+              onChangeText={setSenha}
+              secureTextEntry
+            />
+
+            <View style={{ alignItems: 'center', width: '100%' }}>
+            <TouchableOpacity onPress={() => router.push('/reset-password')}>
+           <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
+          </TouchableOpacity>
+          </View>
+
+          </>
         )}
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -173,6 +181,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 12,
   },
+  forgotPasswordContainer: {
+    alignSelf: 'flex-end',
+    marginBottom: 10,
+  },
+  forgotPasswordText: {
+    color: '#fff',
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
   button: {
     backgroundColor: '#fff',
     paddingVertical: 15,
@@ -197,5 +214,5 @@ const styles = StyleSheet.create({
     color: '#ff3333',
     marginBottom: 10,
     fontWeight: 'bold',
-  }
+  },
 });
