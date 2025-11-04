@@ -120,7 +120,7 @@ export default function LoginScreen() {
             />
 
             <View style={{ alignItems: 'center', width: '100%' }}>
-            <TouchableOpacity onPress={() => router.push('/reset-password')}>
+            <TouchableOpacity onPress={() => router.push('/(reset)/reset-first')}>
            <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
           </TouchableOpacity>
           </View>
