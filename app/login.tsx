@@ -49,36 +49,46 @@ export default function LoginScreen() {
   }
 
   async function handleLogin() {
-    setError('');
+  setError('');
 
-    try {
-      const response = await api.post(
-        '/api/v1/auth/login',
-        { email, password: senha },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+  try {
+    const response = await api.post(
+      '/api/v1/auth/login',
+      { email, password: senha },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
 
-      const { token } = response.data;
+    const { token } = response.data;
 
-      if (!token) {
-        setError('Falha ao autenticar usuário.');
-        return;
-      }
+    if (!token) {
+      setError('Falha ao autenticar usuário.');
+      return;
+    }
 
-      setUser({
-        ...userFound,
-        token,
-      } as any);
+    // Cria um novo objeto com o userFound e o token
+    const userData = {
+      ...userFound,
+      token,
+    } as User;
 
-      router.push('/home');
-    } catch (e: any) {
-      if (e.response?.status === 401) {
-        setError('Senha incorreta.');
-      } else {
-        setError('Erro ao realizar login.');
-      }
+    // Salva o usuário no Zustand
+    setUser(userData);
+
+    // Verifica a role e redireciona
+    if (userData.role === 'admin') {
+      router.push('/(protected)/(admin)/profile');
+    } else {
+      router.push('/(protected)/(tabs)/home');
+    }
+
+  } catch (e: any) {
+    if (e.response?.status === 401) {
+      setError('Senha incorreta.');
+    } else {
+      setError('Erro ao realizar login.');
     }
   }
+}
 
   return (
     <View style={styles.container}>

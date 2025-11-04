@@ -42,13 +42,6 @@ export default function AdminProfile() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Perfil</Text>
-        <View style={{ width: 24 }} />
-      </View>
 
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Meu Cadastro</Text>
