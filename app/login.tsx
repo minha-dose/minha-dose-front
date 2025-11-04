@@ -129,10 +129,13 @@ export default function LoginScreen() {
           </Text>
         </TouchableOpacity>
 
+        {/*
         <Text style={styles.footerText}>
           Não possui cadastro?
           <Text onPress={() => router.push('/cadastro')} style={styles.link}> Registrar</Text>
         </Text>
+        */}
+
       </View>
     </View>
   );

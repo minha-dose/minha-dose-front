@@ -1,6 +1,7 @@
 import api from '@/api/api';
 import { useUserStore } from '@/app/store/useUserStore';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Keyboard, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { globalStyles } from '../../../global';
@@ -92,14 +93,27 @@ export default function ProfileScree() {
       console.error('Erro ao atualizar dados:', error);
     }
   };
+  const router = useRouter();
+const setUser = useUserStore((state) => state.setUser);
+
+  const handleLogout = () => {
+  setUser(null); // limpa o usuário do Zustand
+  router.replace('/'); // volta para tela inicial (ou login)
+};
 
   return (
     <View style={globalStyles.container}>
       <View style={globalStyles.profileHeader}>
         <Text style={globalStyles.cadastroIntro}>Meu Cadastro</Text>
+          <View style={{ flexDirection: 'row', gap: 16 }}>
+          <TouchableOpacity onPress={handleLogout}>
+            <FontAwesome name="sign-out" size={24} color="#022757" />
+          </TouchableOpacity>
+
         <TouchableOpacity onPress={() => setIsEditing((prev) => !prev)}>
           <FontAwesome name="pencil" size={24} color="#022757" />
         </TouchableOpacity>
+      </View>
       </View>
 
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
