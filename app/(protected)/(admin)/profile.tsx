@@ -1,19 +1,21 @@
 import api from "@/api/api";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useUserStore } from "@/app/store/useUserStore"; // 👈 mesmo store do usuário comum
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function AdminProfile() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const { setUser } = useUserStore(); // 👈 para limpar o usuário no logout
+  const [user, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await api.get("/api/v1/users/7");
-        setUser(response.data);
+        setUserData(response.data);
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error);
       } finally {
@@ -23,6 +25,11 @@ export default function AdminProfile() {
 
     fetchUser();
   }, []);
+
+  const handleLogout = () => {
+    setUser(null); // limpa Zustand
+    router.replace("/"); // volta pra tela inicial ou login
+  };
 
   if (loading) {
     return (
@@ -42,14 +49,21 @@ export default function AdminProfile() {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Meu Cadastro</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.sectionTitle}>Meu Cadastro</Text>
+
+          {/* 👇 Botão de logout adicionado aqui */}
+          <TouchableOpacity onPress={handleLogout}>
+            <FontAwesome name="sign-out" size={20} color="#083474" />
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.profileRow}>
           <View style={styles.avatarContainer}>
             <Ionicons name="person-circle" size={64} color="#083474" />
           </View>
+
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user.name || "Nome não informado"}</Text>
             <Text style={styles.userCpf}>{user.cpf || "CPF não informado"}</Text>
@@ -57,8 +71,8 @@ export default function AdminProfile() {
 
           <View style={styles.actionIcons}>
             <TouchableOpacity onPress={() => router.push("/(protected)/(admin)/settings")}>
-  <Ionicons name="settings-sharp" size={20} color="#083474" />
-</TouchableOpacity>
+              <Ionicons name="settings-sharp" size={20} color="#083474" />
+            </TouchableOpacity>
 
             <TouchableOpacity style={{ marginLeft: 10 }}>
               <MaterialIcons name="edit" size={20} color="#083474" />
@@ -84,27 +98,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  header: {
-    backgroundColor: "#083474",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
   content: {
     padding: 20,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 16,
     color: "#4A4A4A",
     fontWeight: "500",
-    marginBottom: 10,
   },
   profileRow: {
     flexDirection: "row",
