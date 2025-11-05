@@ -1,21 +1,21 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
 import api from '@/api/api';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 interface UBS {
   id: number;
@@ -28,7 +28,7 @@ interface UBS {
   };
 }
 
-export default function CadastrarVacina() {
+export default function NewVaccin() {
   const router = useRouter();
   const [ubsList, setUbsList] = useState<UBS[]>([]);
   const [selectedUbs, setSelectedUbs] = useState<UBS | null>(null);
