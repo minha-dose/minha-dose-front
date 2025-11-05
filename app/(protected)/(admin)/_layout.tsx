@@ -18,6 +18,7 @@ export default function AdminLayout() {
         name="home"
         options={{
           title: "Início",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
