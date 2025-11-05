@@ -1,10 +1,9 @@
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Octicons from '@expo/vector-icons/Octicons';
 import { Tabs } from 'expo-router';
-import React from "react";
 
 export default function TabLayout() {
     return (
@@ -13,15 +12,25 @@ export default function TabLayout() {
             headerStyle: { backgroundColor: "#083474" },
             headerTintColor: "#fff",
             tabBarStyle: {
-                backgroundColor: '#FAFAFA'
-            }
+                backgroundColor: '#083474'
+            },
+            tabBarInactiveTintColor: '#fff',
         }}>
             <Tabs.Screen
                 name="home"
                 options={{
                     title: 'Home',
                     headerShown: false,
+                    tabBarLabel: 'Home',
                     tabBarIcon: ({ color, size }) => <Entypo name="home" size={size} color={color} />,
+                }}
+            />
+            <Tabs.Screen
+                name="vaccins"
+                options={{
+                    title: 'Agendar',
+                    tabBarLabel: 'Agendar',
+                    tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="calendar-clock" size={size} color={color} />
                 }}
             />
             <Tabs.Screen
@@ -35,22 +44,16 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="vaccincard"
                 options={{
-                    tabBarLabel: 'Meu Cartão',
-                    headerTitle: 'Cartão de Vacina SUS',
+                    tabBarLabel: 'Histórico',
+                    headerShown: false,
                     tabBarIcon: ({ color, size }) => <Octicons name="checklist" size={size} color={color} />
-                }}
-            />
-            <Tabs.Screen
-                name="vaccins"
-                options={{
-                    title: 'Vacinas',
-                    tabBarIcon: ({ color, size }) => <MaterialIcons name="vaccines" size={size} color={color} />
                 }}
             />
             <Tabs.Screen
                 name="profile"
                 options={{
                     title: "Perfil",
+                    tabBarLabel: 'Perfil',
                     tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" size={size} color={color} />
                 }}
             />
