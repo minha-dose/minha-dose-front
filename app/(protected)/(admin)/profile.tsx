@@ -2,12 +2,12 @@ import api from "@/api/api";
 import { useUserStore } from "@/app/store/useUserStore"; // 👈 mesmo store do usuário comum
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function AdminProfile() {
   const router = useRouter();
-  const { setUser } = useUserStore(); // 👈 para limpar o usuário no logout
+  const { setUser } = useUserStore(); 
   const [user, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +28,7 @@ export default function AdminProfile() {
 
   const handleLogout = () => {
     setUser(null); // limpa Zustand
-    router.replace("/"); // volta pra tela inicial ou login
+    router.replace("/"); 
   };
 
   if (loading) {
@@ -53,7 +53,6 @@ export default function AdminProfile() {
         <View style={styles.headerRow}>
           <Text style={styles.sectionTitle}>Meu Cadastro</Text>
 
-          {/* 👇 Botão de logout adicionado aqui */}
           <TouchableOpacity onPress={handleLogout}>
             <FontAwesome name="sign-out" size={20} color="#083474" />
           </TouchableOpacity>

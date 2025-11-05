@@ -1,5 +1,6 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs } from 'expo-router';
 
 export default function AdminLayout() {
@@ -13,6 +14,24 @@ export default function AdminLayout() {
       }}
     >
       {/* Telas visíveis no menu inferior */}
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: "Início",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="new-ubs"
+        options={{
+          title: "Cadastrar UBS",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="local-hospital" size={size} color={color} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="new-vaccin"
         options={{
@@ -36,7 +55,7 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="settings/index"
         options={{
-          href: null, // <-- oculta completamente da tab bar
+          href: null, 
         }}
       />
       <Tabs.Screen
