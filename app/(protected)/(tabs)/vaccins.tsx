@@ -2,13 +2,13 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Dimensions,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width } = Dimensions.get('window');
@@ -82,7 +82,7 @@ export default function VaccinsScreen() {
     <TouchableOpacity
       style={styles.vaccineCard}
       onPress={() => router.push({
-        pathname: "/vaccine-details", // Rota para detalhes da vacina (será criada abaixo)
+        pathname: "/(protected)/agendamentos", 
         params: {
           name: item.name,
           description: item.description,

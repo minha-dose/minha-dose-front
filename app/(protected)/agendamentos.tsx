@@ -1,13 +1,18 @@
 // Tela de Agendamento integrada com backend real — agendamentos.tsx
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  View, Text, TouchableOpacity, ActivityIndicator, FlatList,
-  KeyboardAvoidingView, ScrollView, Platform, StyleSheet
+  ActivityIndicator, FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text, TouchableOpacity,
+  View
 } from 'react-native';
-import api from '../../../api/api'; // Seu wrapper do axios/fetch
-import SuccessModal from '../../../components/SuccessModal';
-import { globalStyles } from '../../../global';
+import api from '../../api/api'; // Seu wrapper do axios/fetch
+import SuccessModal from '../../components/SuccessModal';
+import { globalStyles } from '../../global';
 
 // LEGENDAS DE ENDPOINTS DA COLLECTION DO BACKEND
 // 🔹 Listar UBSs disponíveis:         GET /api/v1/ubs
