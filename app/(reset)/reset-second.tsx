@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Image,
     Keyboard,
@@ -59,7 +59,7 @@ export default function ResetPasswordCodeScreen() {
 
             const { token } = response.data; 
             setAuthField('token', token);
-            router.push('/(reset)/reset-second');
+            router.push('/(reset)/reset-third');
         } catch (error: any) {
             console.log(error);
             alert(error.response?.data?.error || 'Erro ao validar código.');
