@@ -1,36 +1,32 @@
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Octicons from '@expo/vector-icons/Octicons';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
     return (
         <Tabs screenOptions={{
-            tabBarActiveTintColor: "#fff",
+            tabBarActiveTintColor: "#083474",
             headerStyle: { backgroundColor: "#083474" },
             headerTintColor: "#fff",
             tabBarStyle: {
-                backgroundColor: '#083474'
-            },
-            tabBarInactiveTintColor: '#fff',
+                backgroundColor: '#FAFAFA'
+            }
         }}>
             <Tabs.Screen
                 name="home"
                 options={{
                     title: 'Home',
                     headerShown: false,
-                    tabBarLabel: 'Home',
                     tabBarIcon: ({ color, size }) => <Entypo name="home" size={size} color={color} />,
                 }}
             />
             <Tabs.Screen
-                name="vaccins"
+                name="(appointment)/appointment"
                 options={{
-                    title: 'Agendar',
-                    tabBarLabel: 'Agendar',
-                    tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="calendar-clock" size={size} color={color} />
+                    title: 'Agendamento',
+                    tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />
                 }}
             />
             <Tabs.Screen
@@ -44,8 +40,8 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="vaccincard"
                 options={{
-                    tabBarLabel: 'Histórico',
-                    headerShown: false,
+                    tabBarLabel: 'Meu Cartão',
+                    headerTitle: 'Cartão de Vacina SUS',
                     tabBarIcon: ({ color, size }) => <Octicons name="checklist" size={size} color={color} />
                 }}
             />
@@ -53,7 +49,6 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     title: "Perfil",
-                    tabBarLabel: 'Perfil',
                     tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" size={size} color={color} />
                 }}
             />
@@ -64,6 +59,13 @@ export default function TabLayout() {
                     href: null,
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => <Octicons name="question" size={size} color={color} />
+                }}
+            />
+            <Tabs.Screen
+                name="(appointment)/appointment-ubs"
+                options={{
+                    href: null,
+                    title: "Selecionar UBS",
                 }}
             />
         </Tabs>

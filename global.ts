@@ -40,7 +40,7 @@ export const globalStyles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 5,
   },
-  profileColum:{
+  profileColum: {
     flex: 1,
   },
   profileHeader: {
@@ -56,7 +56,7 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
   },
-  profileUpdateBtnTxt:{
+  profileUpdateBtnTxt: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
@@ -96,25 +96,25 @@ export const globalStyles = StyleSheet.create({
     color: "white",
     fontWeight: "bold"
   },
-  loadingContainer:{
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#022757',
   },
-  loadingTitle:{
+  loadingTitle: {
     fontSize: 35,
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#FFFFFF'
   },
-  loadingSubtitle:{
+  loadingSubtitle: {
     fontSize: 16,
     textAlign: 'center',
     color: '#FFFFFF',
   },
-  loadingImage:{
+  loadingImage: {
     width: 350,
     height: 350,
     marginTop: 20,
@@ -165,7 +165,7 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-   buttonContainer: {
+  buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 12,
@@ -210,7 +210,7 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'left',
     fontWeight: 'bold',
   },
-  cadastroSubTitle:{
+  cadastroSubTitle: {
     color: '#022757',
     fontSize: 12,
     marginTop: 10,
@@ -221,7 +221,7 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 8,
-  }, 
+  },
   smallLogo: {
     width: 100,
     height: 100,
@@ -249,4 +249,86 @@ export const globalStyles = StyleSheet.create({
     marginBottom: 20,
     color: '#333',
   },
+  appointmentMainView: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16,
+  },
+  appointmentScreenTitle: {
+    fontSize: 15,
+    marginTop: 20,
+    color: "#002856",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  appointmentSearchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F0F0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 40,
+    marginTop: 20,
+  },
+  appointmentSearchIcon: {
+    marginRight: 10,
+  },
+  appointmentSearchInput: {
+    flex: 1,
+    height: 48,
+    fontSize: 16,
+    color: "#333",
+  },
+  appointmentFlatListContainer: {
+    paddingBottom: 30,
+  },
+  appointmentFlatListItem: {
+    backgroundColor: "#F8F8F8",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  appointmentFlatListText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  appointmentEmptyText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#777",
+    marginTop: 30,
+  },
+  appointUbsChooseBtnTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold"
+  },
+  appointmentUbsChooseBtn: {
+    backgroundColor: "#022757",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center"
+  },
+  appointmentUbsChooseView: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20
+  },
+  loadingAppointment: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFF"
+  },
+  loadingAppointmentTxt: {
+    marginTop: 10,
+    color: "#002856"
+  }
 });
