@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,7 +14,6 @@ import {
   TouchableWithoutFeedback,
   View
 } from 'react-native';
-import { useLocalSearchParams } from "expo-router";
 import api from '../../api/api';
 import SuccessModal from '../../components/SuccessModal';
 import { globalStyles } from '../../global';
@@ -47,15 +47,14 @@ export default function Agendamentos() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [loadingVacinas, setLoadingVacinas] = useState(false);
   const [loadingUbs, setLoadingUbs] = useState(false);
   const [loadingDates, setLoadingDates] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   // Carregar todas as vacinas, e setar a vacina selecionada (se veio da escolha anterior)
+  
   useEffect(() => {
-    setLoadingVacinas(true);
     api.get('/api/v1/getAllVaccins')
       .then(res => {
         setVacinas(res.data || []);
@@ -66,9 +65,8 @@ export default function Agendamentos() {
           );
           if (existente) setSelectedVacina(existente);
         }
-      })
-      .finally(() => setLoadingVacinas(false));
-  }, []);
+      });
+  }, [selectedVaccineName]);
 
   // Buscar UBSs que possuem a vacina selecionada
   useEffect(() => {
@@ -92,7 +90,7 @@ export default function Agendamentos() {
         .catch(() => setFilteredUbs([]))
         .finally(() => setLoadingUbs(false));
     }
-  }, [selectedVacina, vacinas]);
+  }, [selectedVaccineName, selectedVacina, vacinas]);
 
   // Chamar disponibilidade de horários/datas após escolher UBS
   useEffect(() => {
@@ -107,12 +105,13 @@ export default function Agendamentos() {
     })
       .then(res => {
         const raw = res.data || [];
-        const rows = raw.flatMap(item => {
+        type Row = { date: string; times: any[] };
+        const rows: Row[] = raw.flatMap((item: any) => {
           if (item.date && Array.isArray(item.times))
             return [{ date: String(item.date), times: item.times }];
           return [];
         });
-        const dates = rows.map(r => r.date);
+        const dates = rows.map((r: Row) => r.date);
         setAvailableDates(dates);
       })
       .catch(() => setAvailableDates([]))
@@ -169,27 +168,26 @@ export default function Agendamentos() {
     <KeyboardAvoidingView style={globalStyles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <SafeAreaView style={styles.headerOuter}>
         <View style={styles.header}>
-          <Text numberOfLines={1} style={styles.headerTitle}>Agendamento de Vacina</Text>
+          <Text numberOfLines={1} style={styles.headerTitle}> Agendamento de Vacina</Text>
         </View>
       </SafeAreaView>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={{ padding: 16,paddingTop: 100 }} keyboardShouldPersistTaps="handled">
           
           {/* Card de escolha anterior */}
-          <View style={styles.selectionCard}>
-            <Text style={styles.selectionTitle}>Vacina escolhida:</Text>
-            <Text style={styles.selectionName}>{selectedVaccineName}</Text>
-            <Text style={styles.selectionDescription}>{selectedVaccineDesc}</Text>
-            <Text style={styles.selectionDetails}><Text style={{fontWeight:"bold"}}>Detalhes:</Text> {selectedVaccineDetails}</Text>
-            {selectedUbsList.length > 0 && (
-              <Text style={styles.selectionUbs}><Text style={{fontWeight:"bold"}}>UBSs disponíveis:</Text> {selectedUbsList.join(", ")}</Text>
-            )}
-          </View>
-
+            <View style={styles.selectionCard}>
+              <Text style={styles.selectionTitle}>Vacina escolhida:</Text>
+              <Text style={styles.selectionName}>{selectedVaccineName}</Text>
+              <Text style={styles.selectionDescription}>{selectedVaccineDesc}</Text>
+              <Text style={styles.selectionDetails}>
+                <Text style={{ fontWeight: "bold" }}>Detalhes:</Text> {selectedVaccineDetails}
+              </Text>
+            </View>
           {/* UBSs */}
-          <Text style={styles.label}>UBSs com esta vacina</Text>
-          {loadingUbs ? <ActivityIndicator /> : (
-            filteredUbs.length > 0 ? (
+            <Text style={styles.label}>UBSs com esta vacina:</Text>
+            {loadingUbs ? (
+              <ActivityIndicator />
+            ) : filteredUbs.length > 0 ? (
               <FlatList
                 data={filteredUbs}
                 keyExtractor={item => String(item.id)}
@@ -208,8 +206,11 @@ export default function Agendamentos() {
                 style={{ marginBottom: 12 }}
                 showsHorizontalScrollIndicator={false}
               />
-            ) : <Text style={{ color: '#666', marginBottom: 12 }}>Nenhuma UBS encontrada para esta vacina.</Text>
-          )}
+            ) : (
+              <Text style={{ color: '#666', marginBottom: 12 }}>
+                Nenhuma UBS encontrada para esta vacina.
+              </Text>
+            )}
 
           {/* Datas do calendário */}
           {selectedUbs && (
@@ -321,16 +322,16 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   selectionTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "700",
     color: "#002856",
     marginBottom: 8,
   },
   selectionName: {
-    fontSize: 18,
+    fontSize: 30,
     fontWeight: "bold",
     marginBottom: 4,
-    color: "#002856",
+    color: "#0004fdff",
   },
   selectionDescription: {
     fontSize: 14,
