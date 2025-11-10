@@ -32,7 +32,7 @@ export default function AppointmentScreen() {
       const response = await api.get("/api/v1/vaccin/");
       setVaccins(response.data);
     } catch (error) {
-      console.log("Erro ao recuperar a lista de vacinas: ", error);
+      console.log("Erro ao recuperar a lista de vacinas:", error);
     } finally {
       setLoading(false);
     }
@@ -40,10 +40,18 @@ export default function AppointmentScreen() {
 
   const getVaccinByName = async (name: string) => {
     try {
-      const response = await api.get(`/api/v1/vaccin?name=${name}`);
-      setVaccins(response.data);
-    } catch (error) {
-      console.log("Erro ao recuperar a lista de vacinas: ", error);
+      const response = await api.get(`/api/v1/vaccin/findByName?name=${encodeURIComponent(name.trim().toLowerCase())}`);
+      console.log("Resposta:", response.data);
+
+      const data = Array.isArray(response.data) ? response.data : [response.data];
+      setVaccins(data);
+    } catch (error: any) {
+      console.log(
+        "Erro ao recuperar a vacina:",
+        error.response?.status,
+        error.response?.data || error.message
+      );
+      setVaccins([]);
     }
   };
 
@@ -54,16 +62,6 @@ export default function AppointmentScreen() {
       getVaccinList();
       return () => setVaccins([]);
     }, [])
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      if (search.trim() === "") {
-        getVaccinList();
-      } else {
-        getVaccinByName(search);
-      }
-    }, [search])
   );
 
   if (loading) {
@@ -97,6 +95,14 @@ export default function AppointmentScreen() {
             placeholderTextColor="#888"
             value={search}
             onChangeText={setSearch}
+            returnKeyType="search"
+            onSubmitEditing={() => {
+              if (search.trim() === "") {
+                getVaccinList();
+              } else {
+                getVaccinByName(search);
+              }
+            }}
           />
         </View>
 

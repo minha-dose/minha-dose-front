@@ -65,7 +65,7 @@ export default function TabLayout() {
                 name="(appointment)/appointment-ubs"
                 options={{
                     href: null,
-                    title: "Selecionar UBS",
+                    title: "Agendamento",
                 }}
             />
         </Tabs>
