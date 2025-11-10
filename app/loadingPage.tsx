@@ -7,39 +7,48 @@ import {
   Keyboard,
   Text,
   TouchableWithoutFeedback,
-  View
+  View,
 } from 'react-native';
 import minhaDoseOps from '../assets/images/minha-dose-ops.png';
 
 export default function LoadingPage() {
-    const router = useRouter();
-    const {next} = useLocalSearchParams();
+  const router = useRouter();
+  const { next } = useLocalSearchParams();
+  const [imageLoaded, setImageLoaded] = React.useState(false);
 
-    const validRoutes = ['/cadastro', '/login', '/home'] as const;
-    const [imageLoaded, setImageLoaded] = React.useState(false);
+  const validRoutes = ['/cadastro', '/login', '/home'] as const;
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if(next && typeof next === 'string'){
-                router.push(next as (typeof validRoutes)[number]);
-            }else{
-                router.push('/');
-            }
-        }, 5000);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (next && typeof next === 'string') {
+        router.push(next as (typeof validRoutes)[number]);
+      } else {
+        router.push('/');
+      }
+    }, 5000);
 
-        return () => clearTimeout(timer);
-    }, []);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={globalStyles.loadingContainer}>
-        <ActivityIndicator size="large" color="#fff" style={{ marginBottom: 20 }} />
+        <ActivityIndicator
+          size="large"
+          color="#fff"
+          style={{ marginBottom: 20 }}
+        />
         <Text style={globalStyles.loadingTitle}>Ops...</Text>
         <Text style={globalStyles.loadingSubtitle}>
-          Não foi possível encontrar uma conta para o e-mail informado.{' '}
-          Vamos criar uma?{'\n'}É super rápido!
+          Não foi possível encontrar uma conta para o e-mail informado.{" "}
+          Vamos criar uma?{"\n"}É super rápido!
         </Text>
-        <Image source={minhaDoseOps} style={globalStyles.loadingImage} onLoad={() => setImageLoaded(true)} />
+        <Image
+          source={minhaDoseOps}
+          style={globalStyles.loadingImage}
+          onLoad={() => setImageLoaded(true)}
+        />
+
       </View>
     </TouchableWithoutFeedback>
   );

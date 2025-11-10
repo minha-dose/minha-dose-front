@@ -3,6 +3,8 @@ import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-nat
 import Carousel from 'react-native-reanimated-carousel';
 import api from '../../../api/api';
 import { useUserStore } from '../../store/useUserStore';
+import FloatingChatButton from "../../../components/FloatingChatButton";
+
 
 const { width } = Dimensions.get('window');
 
@@ -61,6 +63,7 @@ export default function Home() {
             <Image key={index} source={item} style={styles.image} resizeMode="contain" />
           )}
         />
+        <FloatingChatButton />
       </View>
     </ScrollView>
   );
