@@ -56,12 +56,12 @@ export default function AppointmentUbs() {
       const filteredTimes =
         date === currentDate
           ? response.data.freeTimes.filter((time: string) => {
-              const [hour, minute] = time.split(":").map(Number);
-              return (
-                hour > now.getHours() ||
-                (hour === now.getHours() && minute > now.getMinutes())
-              );
-            })
+            const [hour, minute] = time.split(":").map(Number);
+            return (
+              hour > now.getHours() ||
+              (hour === now.getHours() && minute > now.getMinutes())
+            );
+          })
           : response.data.freeTimes;
 
       setAvailableTimes(filteredTimes || []);
@@ -80,11 +80,23 @@ export default function AppointmentUbs() {
 
     try {
       const dateTime = `${selectedDate}T${selectedTime}:00`;
+
+      const dateTimeObj = new Date(dateTime);
+      const dateTimeAdjusted = new Date(dateTimeObj.getTime() + 3 * 60 * 60 * 1000);
+
+      const formattedDateTime = `${dateTimeAdjusted.getFullYear()}-${String(
+        dateTimeAdjusted.getMonth() + 1
+      ).padStart(2, "0")}-${String(dateTimeAdjusted.getDate()).padStart(2, "0")} ${String(
+        dateTimeAdjusted.getHours()
+      ).padStart(2, "0")}:${String(dateTimeAdjusted.getMinutes()).padStart(2, "0")}:${String(
+        dateTimeAdjusted.getSeconds()
+      ).padStart(2, "0")}`;
+      
       await api.post("/api/v1/appointment", {
         userId: user?.id,
         ubsId: selectedUbsId,
         vaccinId: Number(vaccineId),
-        date: dateTime,
+        date: formattedDateTime,
         status: "scheduled",
       });
 
@@ -208,12 +220,12 @@ export default function AppointmentUbs() {
             markedDates={
               selectedDate
                 ? {
-                    [selectedDate]: {
-                      selected: true,
-                      selectedColor: "#002856",
-                      selectedTextColor: "#fff",
-                    },
-                  }
+                  [selectedDate]: {
+                    selected: true,
+                    selectedColor: "#002856",
+                    selectedTextColor: "#fff",
+                  },
+                }
                 : {}
             }
             theme={{
