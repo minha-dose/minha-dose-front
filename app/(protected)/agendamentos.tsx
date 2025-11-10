@@ -1,117 +1,159 @@
-// Tela de Agendamento integrada com backend real — agendamentos.tsx
-
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator, FlatList,
+  ActivityIndicator,
+  FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text, TouchableOpacity,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
   View
 } from 'react-native';
-import api from '../../api/api'; // Seu wrapper do axios/fetch
+import { useLocalSearchParams } from "expo-router";
+import api from '../../api/api';
 import SuccessModal from '../../components/SuccessModal';
 import { globalStyles } from '../../global';
 
-// LEGENDAS DE ENDPOINTS DA COLLECTION DO BACKEND
-// 🔹 Listar UBSs disponíveis:         GET /api/v1/ubs
-// 🔹 Listar vacinas da UBS:           GET /api/v1/ubs/:ubsId/vaccins
-// 🔹 Buscar horários p/ UBS:          GET /api/v1/appointment/availableTime?ubsId=ID
-// 🔹 Criar agendamento:               POST /api/v1/appointment
+function useUserDataStore() {
+  return { id: undefined as number | undefined, name: undefined as string | undefined };
+}
+
+const HORARIOS_PADRAO = [
+  "09:00","09:20","09:40","10:00","10:20","10:40","11:00","11:20","11:40",
+  "12:00","12:20","12:40","13:00","13:20","13:40","14:00","14:20","14:40",
+  "15:00","15:20","15:40","16:00"
+];
 
 export default function Agendamentos() {
-  // Vacinas disponíveis para a UBS selecionada
+  // Recebendo parâmetros via navegação
+  const params = useLocalSearchParams();
+  const selectedVaccineName = params.name as string;
+  const selectedVaccineDesc = params.description as string;
+  const selectedVaccineDetails = params.technicalDetails as string;
+  const selectedUbsList = params.ubsAvailable ? JSON.parse(params.ubsAvailable as string) : [];
+
+  const userStore = useUserDataStore();
+  const currentUserId = userStore?.id ?? 1;
+
   const [vacinas, setVacinas] = useState<any[]>([]);
-  // Lista das UBSs
-  const [ubsList, setUbsList] = useState<any[]>([]);
-  const [ubsLoading, setUbsLoading] = useState(false);
-  // Estado de seleção
-  const [selectedUbs, setSelectedUbs] = useState<any | null>(null);
+  const [filteredUbs, setFilteredUbs] = useState<any[]>([]);
   const [selectedVacina, setSelectedVacina] = useState<any | null>(null);
-  // Slots e datas/hora disponíveis
-  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
-  const [calendarLoading, setCalendarLoading] = useState(false);
-  // Seleção de data e horário
+  const [selectedUbs, setSelectedUbs] = useState<any | null>(null);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [availableTimesForDate, setAvailableTimesForDate] = useState<string[]>([]);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  // Status do agendamento
+  const [loadingVacinas, setLoadingVacinas] = useState(false);
+  const [loadingUbs, setLoadingUbs] = useState(false);
+  const [loadingDates, setLoadingDates] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Lista UBSs do backend no início
+  // Carregar todas as vacinas, e setar a vacina selecionada (se veio da escolha anterior)
   useEffect(() => {
-    setUbsLoading(true);
-    api.get('/api/v1/ubs')
-      .then(res => setUbsList(res.data || []))
-      .catch(() => setUbsList([]))
-      .finally(() => setUbsLoading(false));
+    setLoadingVacinas(true);
+    api.get('/api/v1/getAllVaccins')
+      .then(res => {
+        setVacinas(res.data || []);
+        // Busca por nome, id, etc, caso a navegação só mande nome
+        if (selectedVaccineName) {
+          const existente = (res.data || []).find(
+            (v: any) => v.name === selectedVaccineName
+          );
+          if (existente) setSelectedVacina(existente);
+        }
+      })
+      .finally(() => setLoadingVacinas(false));
   }, []);
 
-  // Quando selecionar UBS, buscar vacinas e limpar seleção anterior
+  // Buscar UBSs que possuem a vacina selecionada
   useEffect(() => {
-    setSelectedVacina(null);
-    setAvailableSlots([]);
+    setSelectedUbs(null);
+    setFilteredUbs([]);
+    setAvailableDates([]);
     setSelectedDate(null);
+    setAvailableTimes([]);
     setSelectedTime(null);
-    if (!selectedUbs) return;
-    api.get(`/api/v1/ubs/${selectedUbs.id}/vaccins`)
-      .then(res => setVacinas(res.data || []))
-      .catch(() => setVacinas([]));
-  }, [selectedUbs]);
+    if (!selectedVaccineName && !selectedVacina?.id) return;
 
-  // Quando selecionar UBS, buscar slots de disponibilidade
+    setLoadingUbs(true);
+    // Usa id da vacina selecionada, pegando do objeto ou dos params
+    const vacinaIdParaBuscar = selectedVacina?.id
+      ? selectedVacina.id
+      : vacinas.find(v => v.name === selectedVaccineName)?.id;
+
+    if (vacinaIdParaBuscar) {
+      api.get(`/api/v1/getUbsByVaccin/${vacinaIdParaBuscar}`)
+        .then(res => setFilteredUbs(res.data || []))
+        .catch(() => setFilteredUbs([]))
+        .finally(() => setLoadingUbs(false));
+    }
+  }, [selectedVacina, vacinas]);
+
+  // Chamar disponibilidade de horários/datas após escolher UBS
   useEffect(() => {
-    setAvailableSlots([]);
+    setAvailableDates([]);
+    setAvailableTimes([]);
     setSelectedDate(null);
     setSelectedTime(null);
     if (!selectedUbs) return;
-    setCalendarLoading(true);
-    api.get('/api/v1/appointment/availableTime', { params: { ubsId: selectedUbs.id } })
+    setLoadingDates(true);
+    api.get('/api/v1/appointment/getAvailableTime', {
+      params: { ubsId: selectedUbs.id }
+    })
       .then(res => {
-        // Resposta esperada: [{date: '2025-11-20', time: '10:00'}, ...]
-        setAvailableSlots(res.data || []);
+        const raw = res.data || [];
+        const rows = raw.flatMap(item => {
+          if (item.date && Array.isArray(item.times))
+            return [{ date: String(item.date), times: item.times }];
+          return [];
+        });
+        const dates = rows.map(r => r.date);
+        setAvailableDates(dates);
       })
-      .catch(() => setAvailableSlots([]))
-      .finally(() => setCalendarLoading(false));
+      .catch(() => setAvailableDates([]))
+      .finally(() => setLoadingDates(false));
   }, [selectedUbs]);
 
-  // Atualiza horários válidos ao escolher data
+  // Buscar horários disponíveis para a data escolhida
   useEffect(() => {
-    if (!selectedDate) {
-      setAvailableTimesForDate([]);
+    if (!selectedDate || !selectedUbs) {
+      setAvailableTimes([]);
       setSelectedTime(null);
       return;
     }
-    const horarios = availableSlots
-      .filter(s => s.date === selectedDate)
-      .map(s => s.time);
-    setAvailableTimesForDate(horarios);
-    setSelectedTime(null);
-  }, [selectedDate, availableSlots]);
+    setLoadingDates(true);
+    api.get('/api/v1/appointment/getAvailableTime', {
+      params: { ubsId: selectedUbs.id, date: selectedDate }
+    })
+      .then(res => {
+        const raw = res.data || [];
+        const times = Array.isArray(raw) ? raw.filter((t: any) => HORARIOS_PADRAO.includes(typeof t === 'string' ? t : t.time || "")).map((t: any) => typeof t === 'string' ? t : t.time || "") : [];
+        setAvailableTimes(times);
+      })
+      .catch(() => setAvailableTimes([]))
+      .finally(() => setLoadingDates(false));
+  }, [selectedDate, selectedUbs]);
 
-  // Monta lista de datas válidas
-  const enabledDatesSet = useMemo(() => {
-    return new Set(availableSlots.map(slot => slot.date));
-  }, [availableSlots]);
-
-  // Realiza a criação do agendamento
+  // Agendamento
   async function handleConfirmBooking() {
-    if (!selectedUbs || !selectedVacina || !selectedDate || !selectedTime) {
-      return alert('Selecione UBS, vacina, data e horário.');
+    if (!selectedVacina && !selectedVaccineName || !selectedUbs || !selectedDate || !selectedTime) {
+      return alert('Selecione vacina, UBS, data e horário.');
     }
     setBookingLoading(true);
     try {
-      await api.post('/api/v1/appointment', {
+      await api.post('/api/v1/appointment/createAppointment', {
+        userId: currentUserId,
         ubsId: selectedUbs.id,
-        vaccinId: selectedVacina.id, // Usando id da vacina selecionada!
-        date: `${selectedDate}T${selectedTime}`,
+        vaccinId: selectedVacina?.id ?? vacinas.find(v => v.name === selectedVaccineName)?.id,
+        date: `${selectedDate}T${selectedTime}:00`,
         status: 'scheduled'
-        // Adapte caso precise enviar userId
       });
       setModalVisible(true);
-      // Reset
       setSelectedUbs(null);
       setSelectedVacina(null);
       setSelectedDate(null);
@@ -124,142 +166,224 @@ export default function Agendamentos() {
   }
 
   return (
-    <KeyboardAvoidingView style={[globalStyles.container, styles.container]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView>
-        <Text style={styles.title}>Agendamento de Vacinação</Text>
-
-        {/* UBSs disponíveis — GET /api/v1/ubs */}
-        <Text style={styles.label}>UBSs disponíveis</Text>
-        {ubsLoading ? <ActivityIndicator /> : (
-          <FlatList
-            data={ubsList}
-            keyExtractor={item => String(item.id)}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[globalStyles.button, selectedUbs?.id === item.id ? { borderWidth: 2, borderColor: '#002C66' } : {}]}
-                onPress={() => setSelectedUbs(item)}
-              >
-                <Text>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            horizontal
-            style={{ marginBottom: 12 }}
-            showsHorizontalScrollIndicator={false}
-          />
-        )}
-
-        {/* Vacinas da UBS — GET /api/v1/ubs/:ubsId/vaccins */}
-        <Text style={styles.label}>Vacina</Text>
-        <FlatList
-          data={vacinas}
-          keyExtractor={item => String(item.id)}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[globalStyles.button, selectedVacina?.id === item.id ? { borderWidth: 2, borderColor: '#0075FF' } : {}]}
-              onPress={() => setSelectedVacina(item)}
-              disabled={!selectedUbs}
-            >
-              <Text>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-          horizontal
-          style={{ marginBottom: 12 }}
-          showsHorizontalScrollIndicator={false}
-        />
-
-        {/* Disponibilidade de dias — GET /api/v1/appointment/availableTime?ubsId */}
-        <Text style={styles.label}>Data</Text>
-        {calendarLoading ? (<ActivityIndicator />) : (
-          <View style={styles.calendarRow}>
-            {ubsList.length === 0 || availableSlots.length === 0 && <Text>Escolha uma UBS para ver as datas disponíveis.</Text>}
-            {Array.from(enabledDatesSet).map(date => (
-              <TouchableOpacity
-                key={date}
-                disabled={!enabledDatesSet.has(date)}
-                style={[
-                  styles.dateButton,
-                  selectedDate === date ? { backgroundColor: '#002C66', borderColor: '#002C66' } : !enabledDatesSet.has(date) ? { backgroundColor: '#eee' } : {}
-                ]}
-                onPress={() => setSelectedDate(date)}
-              >
-                <Text style={{ color: selectedDate === date ? '#fff' : '#222' }}>{date}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* Slots de hora */}
-        <Text style={styles.label}>Horário</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {availableTimesForDate.length === 0 && <Text>Selecione uma data.</Text>}
-          {availableTimesForDate.map(hora => (
-            <TouchableOpacity
-              key={hora}
-              disabled={!selectedDate}
-              style={[
-                styles.timeSlot,
-                selectedTime === hora ? { backgroundColor: '#002C66' } : {}
-              ]}
-              onPress={() => setSelectedTime(hora)}
-            >
-              <Text style={{ color: selectedTime === hora ? '#fff' : '#222' }}>{hora}</Text>
-            </TouchableOpacity>
-          ))}
+    <KeyboardAvoidingView style={globalStyles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <SafeAreaView style={styles.headerOuter}>
+        <View style={styles.header}>
+          <Text numberOfLines={1} style={styles.headerTitle}>Agendamento de Vacina</Text>
         </View>
+      </SafeAreaView>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={{ padding: 16,paddingTop: 100 }} keyboardShouldPersistTaps="handled">
+          
+          {/* Card de escolha anterior */}
+          <View style={styles.selectionCard}>
+            <Text style={styles.selectionTitle}>Vacina escolhida:</Text>
+            <Text style={styles.selectionName}>{selectedVaccineName}</Text>
+            <Text style={styles.selectionDescription}>{selectedVaccineDesc}</Text>
+            <Text style={styles.selectionDetails}><Text style={{fontWeight:"bold"}}>Detalhes:</Text> {selectedVaccineDetails}</Text>
+            {selectedUbsList.length > 0 && (
+              <Text style={styles.selectionUbs}><Text style={{fontWeight:"bold"}}>UBSs disponíveis:</Text> {selectedUbsList.join(", ")}</Text>
+            )}
+          </View>
 
-        {/* Botão de confirmação */}
-        <TouchableOpacity
-          style={[
-            globalStyles.buttonCadastro,
-            styles.confirmButton,
-            !(selectedUbs && selectedVacina && selectedDate && selectedTime) && { backgroundColor: '#ccc' }
-          ]}
-          disabled={!(selectedUbs && selectedVacina && selectedDate && selectedTime)}
-          onPress={handleConfirmBooking}
-        >
-          <Text style={globalStyles.buttonCadastroText}>{bookingLoading ? 'Agendando...' : 'Confirmar Agendamento'}</Text>
-        </TouchableOpacity>
+          {/* UBSs */}
+          <Text style={styles.label}>UBSs com esta vacina</Text>
+          {loadingUbs ? <ActivityIndicator /> : (
+            filteredUbs.length > 0 ? (
+              <FlatList
+                data={filteredUbs}
+                keyExtractor={item => String(item.id)}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      globalStyles.button,
+                      selectedUbs?.id === item.id ? styles.selected : {}
+                    ]}
+                    onPress={() => setSelectedUbs(item)}
+                  >
+                    <Text>{item.name}</Text>
+                  </TouchableOpacity>
+                )}
+                horizontal
+                style={{ marginBottom: 12 }}
+                showsHorizontalScrollIndicator={false}
+              />
+            ) : <Text style={{ color: '#666', marginBottom: 12 }}>Nenhuma UBS encontrada para esta vacina.</Text>
+          )}
 
-        <SuccessModal visible={modalVisible} onClose={() => setModalVisible(false)} message="Agendamento realizado com sucesso!" />
-      </ScrollView>
+          {/* Datas do calendário */}
+          {selectedUbs && (
+            <>
+              <Text style={styles.label}>Datas disponíveis (mês atual)</Text>
+              {loadingDates ? <ActivityIndicator /> : (
+                <View style={styles.calendarRow}>
+                  {availableDates.length === 0 && <Text style={{ color: '#666' }}>Nenhuma data disponível para o mês atual.</Text>}
+                  {availableDates.map(date => (
+                    <TouchableOpacity
+                      key={date}
+                      style={[
+                        styles.dateButton,
+                        selectedDate === date ? { backgroundColor: '#002C66', borderColor: '#002C66' } : {},
+                      ]}
+                      onPress={() => setSelectedDate(date)}
+                    >
+                      <Text style={{ color: selectedDate === date ? '#fff' : '#222' }}>{date.slice(8)}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </>
+          )}
+
+          {/* Horários */}
+          {selectedDate && (
+            <>
+              <Text style={styles.label}>Horários disponíveis</Text>
+              {loadingDates ? <ActivityIndicator /> : (
+                availableTimes.length === 0 ? <Text style={{ color: '#666' }}>Nenhum horário disponível nesta data.</Text> : (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                    {HORARIOS_PADRAO.map(hora => (
+                      <TouchableOpacity
+                        key={hora}
+                        style={[
+                          styles.timeSlot,
+                          selectedTime === hora ? { backgroundColor: '#002C66' } : {},
+                          !availableTimes.includes(hora) ? { opacity: 0.5 } : {}
+                        ]}
+                        disabled={!availableTimes.includes(hora)}
+                        onPress={() => setSelectedTime(hora)}
+                      >
+                        <Text style={{ color: selectedTime === hora ? '#fff' : '#222' }}>{hora}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )
+              )}
+            </>
+          )}
+
+          {/* Botão de confirmação */}
+          <TouchableOpacity
+            style={[
+              globalStyles.buttonCadastro,
+              styles.confirmButton,
+              !(selectedVacina || selectedVaccineName) || !selectedUbs || !selectedDate || !selectedTime ? { backgroundColor: '#ccc' } : {}
+            ]}
+            disabled={!(selectedVacina || selectedVaccineName) || !selectedUbs || !selectedDate || !selectedTime}
+            onPress={handleConfirmBooking}
+          >
+            <Text style={globalStyles.buttonCadastroText}>{bookingLoading ? 'Agendando...' : 'Confirmar Agendamento'}</Text>
+          </TouchableOpacity>
+
+          <SuccessModal visible={modalVisible} onClose={() => setModalVisible(false)} message="Agendamento realizado com sucesso!" />
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
 
-// -----
 const styles = StyleSheet.create({
   container: { paddingTop: 20 },
-  title: {
+
+  headerOuter: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    backgroundColor: '#002C66'
+  },
+
+  header: {
+    backgroundColor: '#002C66',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    paddingVertical: 30,
+    paddingHorizontal: 30,
+    height: 80
+  },
+
+  headerTitle: {
+    color: '#fff',
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#022757',
+    fontWeight: '800'
+  },
+
+  selectionCard: {
+    backgroundColor: "#F0F6FC",
+    borderRadius: 10,
+    padding: 16,
     marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1.41,
+    elevation: 2,
   },
+  selectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#002856",
+    marginBottom: 8,
+  },
+  selectionName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 4,
+    color: "#002856",
+  },
+  selectionDescription: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 4,
+  },
+  selectionDetails: {
+    fontSize: 13,
+    color: "#444",
+    marginBottom: 4,
+  },
+  selectionUbs: {
+    fontSize: 13,
+    color: "#444",
+  },
+
   label: {
-    color: '#022757',
+    fontSize: 14,
     fontWeight: '600',
-    marginBottom: 6,
+    marginBottom: 8,
+    color: '#333'
   },
+
   calendarRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 8,
+    marginBottom: 12
   },
+
   dateButton: {
+    padding: 8,
     borderWidth: 1,
     borderColor: '#ddd',
-    backgroundColor: '#f9f9f9',
     borderRadius: 6,
-    margin: 2,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
+    marginRight: 8,
+    marginBottom: 8
   },
+
   timeSlot: {
     padding: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
     borderRadius: 6,
-    margin: 3,
-    backgroundColor: '#f5f5f5',
+    margin: 4
   },
-  confirmButton: { marginTop: 18 },
+
+  selected: {
+    borderWidth: 2,
+    borderColor: '#002C66'
+  },
+
+  confirmButton: {
+    marginTop: 16,
+    alignSelf: 'stretch'
+  }
 });
