@@ -76,7 +76,7 @@ export default function LoginScreen() {
 
     // Verifica a role e redireciona
     if (userData.role === 'admin') {
-      router.push('/(protected)/(admin)/profile');
+      router.push('/(protected)/(admin)/home');
     } else {
       router.push('/(protected)/(tabs)/home');
     }

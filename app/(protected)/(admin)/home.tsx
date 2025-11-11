@@ -7,7 +7,7 @@ import { useUserStore } from '../../store/useUserStore';
 const { width } = Dimensions.get('window');
 
 const images = [
-  require("../../../assets/images/splash-icon.png"),
+  require("../../../assets/images/banner01.jpg"),
   require("../../../assets/images/splash-icon.png"),
   require("../../../assets/images/splash-icon.png"),
 ];
