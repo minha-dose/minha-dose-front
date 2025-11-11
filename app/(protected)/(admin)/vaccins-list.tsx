@@ -3,25 +3,23 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    FlatList,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface Vaccine {
   id: number;
   name: string;
-  batch: string;
+  batch: string | number;
   manufacturer: string;
-  manufacturingDate: string;
-  expirationDate: string;
-  quantityReceived: number;
-  receiptDate: string;
-  ubsName?: string;
+  expiration: string;
+  ubs: { id: number; ubsName: string }[];
 }
 
 export default function VaccinList() {
@@ -51,6 +49,30 @@ export default function VaccinList() {
     fetchVaccines();
   };
 
+  const deleteVaccine = async (id: number) => {
+    Alert.alert(
+      'Confirmar exclusão',
+      'Tem certeza que deseja remover esta vacina?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Remover',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.delete(`/api/v1/vaccin/${id}`);
+              setVaccines((prev) => prev.filter((v) => v.id !== id));
+              Alert.alert('Sucesso', 'Vacina removida com sucesso.');
+            } catch (error) {
+              console.error('Erro ao deletar vacina:', error);
+              Alert.alert('Erro', 'Não foi possível remover a vacina.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -59,31 +81,48 @@ export default function VaccinList() {
     );
   }
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
         data={vaccines}
         keyExtractor={(item) => item.id.toString()}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#083474']} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#083474']}
+          />
         }
         contentContainerStyle={{ paddingBottom: 40 }}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>{item.name}</Text>
-              <Text style={styles.cardBatch}>Lote {item.batch}</Text>
+              <View>
+                <Text style={styles.cardTitle}>{item.name}</Text>
+                <Text style={styles.cardBatch}>Lote {item.batch}</Text>
+              </View>
+              <TouchableOpacity onPress={() => deleteVaccine(item.id)}>
+                <Ionicons name="trash-outline" size={22} color="#B00020" />
+              </TouchableOpacity>
             </View>
 
             <Text style={styles.cardText}>Fabricante: {item.manufacturer}</Text>
-            <Text style={styles.cardText}>UBS: {item.ubsName || 'Não informada'}</Text>
-            <Text style={styles.cardText}>Qtd. recebida: {item.quantityReceived}</Text>
+            <Text style={styles.cardText}>
+              UBS:{' '}
+              {item.ubs.length > 0
+                ? item.ubs.map((u) => u.ubsName).join(', ')
+                : 'Não informada'}
+            </Text>
 
             <View style={styles.cardFooter}>
               <Text style={styles.cardDate}>
-                Fab: {item.manufacturingDate} | Val: {item.expirationDate}
+                Validade: {formatDate(item.expiration)}
               </Text>
-              <Text style={styles.cardDate}>Recebida: {item.receiptDate}</Text>
             </View>
           </View>
         )}
@@ -94,12 +133,11 @@ export default function VaccinList() {
           </View>
         }
       />
-       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-              <Text style={styles.backButtonText}>← Voltar</Text>
-            </TouchableOpacity>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Text style={styles.backButtonText}>← Voltar</Text>
+      </TouchableOpacity>
     </View>
- 
-);
+  );
 }
 
 const styles = StyleSheet.create({
@@ -108,19 +146,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 20,
-  },
-  backButton: { alignSelf: "center", marginVertical: 20 },
-  backButtonText: { color: "#083474", fontSize: 16, fontWeight: "600" },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#083474',
-  },
+  backButton: { alignSelf: 'center', marginVertical: 20 },
+  backButtonText: { color: '#083474', fontSize: 16, fontWeight: '600' },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -137,6 +164,7 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 6,
   },
   cardTitle: {

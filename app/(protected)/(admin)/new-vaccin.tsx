@@ -36,19 +36,12 @@ export default function NewVaccin() {
   const [loading, setLoading] = useState(false);
   const [loadingUbs, setLoadingUbs] = useState(true);
 
-  // Form fields
   const [nomeVacina, setNomeVacina] = useState('');
   const [lote, setLote] = useState('');
   const [fabricante, setFabricante] = useState('');
-  const [quantidade, setQuantidade] = useState('');
 
-  // Date states
-  const [dataFabricacao, setDataFabricacao] = useState<Date | null>(null);
-  const [showDataFabricacao, setShowDataFabricacao] = useState(false);
   const [dataValidade, setDataValidade] = useState<Date | null>(null);
   const [showDataValidade, setShowDataValidade] = useState(false);
-  const [dataRecebimento, setDataRecebimento] = useState<Date | null>(null);
-  const [showDataRecebimento, setShowDataRecebimento] = useState(false);
 
   useEffect(() => {
     fetchUbs();
@@ -74,26 +67,12 @@ export default function NewVaccin() {
     return `${day}/${month}/${year}`;
   };
 
-  const handleDateChange = (
-    event: any,
-    selectedDate: Date | undefined,
-    field: 'fabricacao' | 'validade' | 'recebimento'
-  ) => {
-    if (Platform.OS === 'android') {
-      if (field === 'fabricacao') setShowDataFabricacao(false);
-      if (field === 'validade') setShowDataValidade(false);
-      if (field === 'recebimento') setShowDataRecebimento(false);
-    }
-
-    if (selectedDate) {
-      if (field === 'fabricacao') setDataFabricacao(selectedDate);
-      if (field === 'validade') setDataValidade(selectedDate);
-      if (field === 'recebimento') setDataRecebimento(selectedDate);
-    }
+  const handleDateChange = (event: any, selectedDate: Date | undefined) => {
+    if (Platform.OS === 'android') setShowDataValidade(false);
+    if (selectedDate) setDataValidade(selectedDate);
   };
 
   const handleCadastrar = async () => {
-    // Validation
     if (!selectedUbs) {
       Alert.alert('Atenção', 'Selecione uma UBS.');
       return;
@@ -110,55 +89,35 @@ export default function NewVaccin() {
       Alert.alert('Atenção', 'Preencha o fabricante.');
       return;
     }
-    if (!dataFabricacao) {
-      Alert.alert('Atenção', 'Selecione a data de fabricação.');
-      return;
-    }
     if (!dataValidade) {
       Alert.alert('Atenção', 'Selecione a data de validade.');
-      return;
-    }
-    if (!quantidade.trim()) {
-      Alert.alert('Atenção', 'Preencha a quantidade recebida.');
-      return;
-    }
-    if (!dataRecebimento) {
-      Alert.alert('Atenção', 'Selecione a data de recebimento.');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Format dates for API (ISO format)
-      const formatDateForAPI = (date: Date) => {
-        return date.toISOString().split('T')[0];
-      };
+      const formatDateForAPI = (date: Date) => date.toISOString().split('T')[0];
 
       const payload = {
-        ubsId: selectedUbs.id,
         name: nomeVacina.trim(),
-        batch: lote.trim(),
         manufacturer: fabricante.trim(),
-        manufacturingDate: formatDateForAPI(dataFabricacao),
-        expirationDate: formatDateForAPI(dataValidade),
-        quantityReceived: parseInt(quantidade, 10),
-        receiptDate: formatDateForAPI(dataRecebimento),
+        batch: lote.trim(),
+        expiration: formatDateForAPI(dataValidade),
+        ubsIds: [selectedUbs.id],
       };
 
-      await api.post('/api/v1/vaccines/', payload);
+      await api.post('/api/v1/vaccin/', payload);
 
       Alert.alert('Sucesso', 'Vacina cadastrada com sucesso!');
-      
-      // Reset form
+      router.push('/(protected)/(admin)/vaccins-list');
+
+      // Resetar form
       setSelectedUbs(null);
       setNomeVacina('');
       setLote('');
       setFabricante('');
-      setQuantidade('');
-      setDataFabricacao(null);
       setDataValidade(null);
-      setDataRecebimento(null);
     } catch (error: any) {
       console.error('Erro ao cadastrar vacina:', error);
       const message =
@@ -181,7 +140,6 @@ export default function NewVaccin() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Title and Description */}
         <View style={styles.introSection}>
           <Text style={styles.title}>Cadastre uma nova vacina!</Text>
           <Text style={styles.description}>
@@ -189,13 +147,9 @@ export default function NewVaccin() {
           </Text>
         </View>
 
-        {/* UBS Selection */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Escolha a ubs</Text>
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() => setShowUbsModal(true)}
-          >
+          <Text style={styles.label}>Escolha a UBS</Text>
+          <TouchableOpacity style={styles.input} onPress={() => setShowUbsModal(true)}>
             <Text style={[styles.inputText, !selectedUbs && styles.placeholderText]}>
               {selectedUbs ? selectedUbs.ubsName : 'Selecione uma UBS'}
             </Text>
@@ -203,7 +157,6 @@ export default function NewVaccin() {
           </TouchableOpacity>
         </View>
 
-        {/* Nome da Vacina */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>Nome da vacina</Text>
           <TextInput
@@ -215,7 +168,6 @@ export default function NewVaccin() {
           />
         </View>
 
-        {/* Lote e Fabricante */}
         <View style={styles.rowContainer}>
           <View style={[styles.fieldContainer, styles.halfWidth]}>
             <Text style={styles.label}>Lote</Text>
@@ -239,86 +191,24 @@ export default function NewVaccin() {
           </View>
         </View>
 
-        {/* Data de Fabricação e Data de Validade */}
-        <View style={styles.rowContainer}>
-          <View style={[styles.fieldContainer, styles.halfWidth]}>
-            <Text style={styles.label}>Data de fabricação</Text>
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => setShowDataFabricacao(true)}
-            >
-              <Text style={[styles.inputText, !dataFabricacao && styles.placeholderText]}>
-                {dataFabricacao ? formatDate(dataFabricacao) : 'Selecione a data'}
-              </Text>
-            </TouchableOpacity>
-            {showDataFabricacao && (
-              <DateTimePicker
-                value={dataFabricacao || new Date()}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={(event, date) => handleDateChange(event, date, 'fabricacao')}
-                maximumDate={new Date()}
-              />
-            )}
-          </View>
-          <View style={[styles.fieldContainer, styles.halfWidth]}>
-            <Text style={styles.label}>Data de validade</Text>
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => setShowDataValidade(true)}
-            >
-              <Text style={[styles.inputText, !dataValidade && styles.placeholderText]}>
-                {dataValidade ? formatDate(dataValidade) : 'Selecione a data'}
-              </Text>
-            </TouchableOpacity>
-            {showDataValidade && (
-              <DateTimePicker
-                value={dataValidade || new Date()}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={(event, date) => handleDateChange(event, date, 'validade')}
-                minimumDate={new Date()}
-              />
-            )}
-          </View>
-        </View>
-
-        {/* Quantidade Recebida e Data de Recebimento */}
-        <View style={styles.rowContainer}>
-          <View style={[styles.fieldContainer, styles.halfWidth]}>
-            <Text style={styles.label}>Quantidade recebida</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite a quantidade"
-              placeholderTextColor="#999"
-              keyboardType="numeric"
-              value={quantidade}
-              onChangeText={setQuantidade}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Data de validade</Text>
+          <TouchableOpacity style={styles.input} onPress={() => setShowDataValidade(true)}>
+            <Text style={[styles.inputText, !dataValidade && styles.placeholderText]}>
+              {dataValidade ? formatDate(dataValidade) : 'Selecione a data'}
+            </Text>
+          </TouchableOpacity>
+          {showDataValidade && (
+            <DateTimePicker
+              value={dataValidade || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(event, date) => handleDateChange(event, date)}
+              minimumDate={new Date()}
             />
-          </View>
-          <View style={[styles.fieldContainer, styles.halfWidth]}>
-            <Text style={styles.label}>Data de recebimento</Text>
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => setShowDataRecebimento(true)}
-            >
-              <Text style={[styles.inputText, !dataRecebimento && styles.placeholderText]}>
-                {dataRecebimento ? formatDate(dataRecebimento) : 'Selecione a data'}
-              </Text>
-            </TouchableOpacity>
-            {showDataRecebimento && (
-              <DateTimePicker
-                value={dataRecebimento || new Date()}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={(event, date) => handleDateChange(event, date, 'recebimento')}
-                maximumDate={new Date()}
-              />
-            )}
-          </View>
+          )}
         </View>
 
-        {/* Submit Button */}
         <TouchableOpacity
           style={[styles.submitButton, loading && styles.submitButtonDisabled]}
           onPress={handleCadastrar}
@@ -327,19 +217,19 @@ export default function NewVaccin() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.submitButtonText}>Cadastra Vacina</Text>
+            <Text style={styles.submitButtonText}>Cadastrar Vacina</Text>
           )}
         </TouchableOpacity>
+
         <TouchableOpacity
-  style={styles.secondaryButton}
-  onPress={() => router.push('/(protected)/(admin)/vaccins-list')}
->
-  <Ionicons name="list" size={18} color="#083474" />
-  <Text style={styles.secondaryButtonText}>Ver vacinas cadastradas</Text>
-</TouchableOpacity>
+          style={styles.secondaryButton}
+          onPress={() => router.push('/(protected)/(admin)/vaccins-list')}
+        >
+          <Ionicons name="list" size={18} color="#083474" />
+          <Text style={styles.secondaryButtonText}>Ver vacinas cadastradas</Text>
+        </TouchableOpacity>
       </ScrollView>
 
-      {/* UBS Selection Modal */}
       <Modal
         visible={showUbsModal}
         transparent
@@ -394,40 +284,14 @@ export default function NewVaccin() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  introSection: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#022757',
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-  },
-  fieldContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#022757',
-    marginBottom: 8,
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+  scrollView: { flex: 1 },
+  scrollContent: { padding: 20, paddingBottom: 40 },
+  introSection: { marginBottom: 24 },
+  title: { fontSize: 24, fontWeight: 'bold', color: '#022757', marginBottom: 12 },
+  description: { fontSize: 14, color: '#666', lineHeight: 20 },
+  fieldContainer: { marginBottom: 16 },
+  label: { fontSize: 14, fontWeight: '600', color: '#022757', marginBottom: 8 },
   input: {
     backgroundColor: '#F5F5F5',
     borderWidth: 1,
@@ -435,28 +299,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 15,
     paddingVertical: 12,
-    fontSize: 16,
-    color: '#022757',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  inputText: {
-    fontSize: 16,
-    color: '#022757',
-    flex: 1,
-  },
-  placeholderText: {
-    color: '#999',
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  halfWidth: {
-    flex: 1,
-  },
+  inputText: { fontSize: 16, color: '#022757', flex: 1 },
+  placeholderText: { color: '#999' },
+  rowContainer: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+  halfWidth: { flex: 1 },
   submitButton: {
     backgroundColor: '#083474',
     paddingVertical: 16,
@@ -465,14 +315,8 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 20,
   },
-  submitButtonDisabled: {
-    opacity: 0.7,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  submitButtonDisabled: { opacity: 0.7 },
+  submitButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -494,17 +338,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#022757',
-  },
-  modalLoader: {
-    padding: 40,
-  },
-  modalList: {
-    maxHeight: 400,
-  },
+  modalTitle: { fontSize: 18, fontWeight: '600', color: '#022757' },
+  modalLoader: { padding: 40 },
+  modalList: { maxHeight: 400 },
   modalItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -514,33 +350,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F5F5F5',
   },
-  modalItemSelected: {
-    backgroundColor: '#F0F7FF',
-  },
-  modalItemText: {
-    fontSize: 16,
-    color: '#022757',
-    flex: 1,
-  },
-  modalItemTextSelected: {
-    fontWeight: '600',
-    color: '#083474',
-  },
+  modalItemSelected: { backgroundColor: '#F0F7FF' },
+  modalItemText: { fontSize: 16, color: '#022757', flex: 1 },
+  modalItemTextSelected: { fontWeight: '600', color: '#083474' },
   secondaryButton: {
-  flexDirection: 'row',
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderWidth: 1,
-  borderColor: '#083474',
-  borderRadius: 8,
-  paddingVertical: 14,
-  marginBottom: 40,
-  gap: 8,
-},
-secondaryButtonText: {
-  color: '#083474',
-  fontSize: 16,
-  fontWeight: '600',
-},
-
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#083474',
+    borderRadius: 8,
+    paddingVertical: 14,
+    marginBottom: 40,
+    gap: 8,
+  },
+  secondaryButtonText: { color: '#083474', fontSize: 16, fontWeight: '600' },
 });
