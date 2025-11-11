@@ -1,6 +1,5 @@
 import api from '@/api/api';
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -16,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 interface UBS {
   id: number;
@@ -198,15 +198,19 @@ export default function NewVaccin() {
               {dataValidade ? formatDate(dataValidade) : 'Selecione a data'}
             </Text>
           </TouchableOpacity>
-          {showDataValidade && (
-            <DateTimePicker
-              value={dataValidade || new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={(event, date) => handleDateChange(event, date)}
-              minimumDate={new Date()}
-            />
-          )}
+            <DateTimePickerModal
+            isVisible={showDataValidade}
+            mode="date"
+            onConfirm={(date) => {
+              setDataValidade(date);
+              setShowDataValidade(false);
+            }}
+            onCancel={() => setShowDataValidade(false)}
+            minimumDate={new Date()}
+            locale="pt-BR"
+            confirmTextIOS="Confirmar"
+            cancelTextIOS="Cancelar"
+          />
         </View>
 
         <TouchableOpacity
