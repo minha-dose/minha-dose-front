@@ -1,5 +1,5 @@
 import api from "@/api/api";
-import { useUserStore } from "@/app/store/useUserStore"; // 👈 mesmo store do usuário comum
+import { useUserStore } from "@/app/store/useUserStore";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";

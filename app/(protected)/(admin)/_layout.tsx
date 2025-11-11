@@ -56,18 +56,28 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="settings/index"
         options={{
+          title: "Configurações",
           href: null, 
         }}
       />
       <Tabs.Screen
         name="settings/new-user"
         options={{
+          title: "Criar usuário",
           href: null,
         }}
       />
       <Tabs.Screen
         name="settings/change-password"
         options={{
+          title: "Alterar senha",
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="ubs-list"
+        options={{
+          title: "UBS cadastradas",
           href: null,
         }}
       />
