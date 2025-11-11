@@ -81,6 +81,13 @@ export default function AdminLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="vaccins-list"
+        options={{
+          title: "Vacinas cadastradas",
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

@@ -80,8 +80,6 @@ export default function UbsListAdmin() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerTitle}>UBSs cadastradas</Text>
-
       <FlatList
         data={ubsList}
         keyExtractor={(item) => item.id.toString()}

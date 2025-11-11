@@ -4,17 +4,17 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface UBS {
@@ -330,6 +330,13 @@ export default function NewVaccin() {
             <Text style={styles.submitButtonText}>Cadastra Vacina</Text>
           )}
         </TouchableOpacity>
+        <TouchableOpacity
+  style={styles.secondaryButton}
+  onPress={() => router.push('/(protected)/(admin)/vaccins-list')}
+>
+  <Ionicons name="list" size={18} color="#083474" />
+  <Text style={styles.secondaryButtonText}>Ver vacinas cadastradas</Text>
+</TouchableOpacity>
       </ScrollView>
 
       {/* UBS Selection Modal */}
@@ -519,4 +526,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#083474',
   },
+  secondaryButton: {
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderWidth: 1,
+  borderColor: '#083474',
+  borderRadius: 8,
+  paddingVertical: 14,
+  marginBottom: 40,
+  gap: 8,
+},
+secondaryButtonText: {
+  color: '#083474',
+  fontSize: 16,
+  fontWeight: '600',
+},
+
 });
