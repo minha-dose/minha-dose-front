@@ -1,6 +1,5 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs } from 'expo-router';
 
 export default function AdminLayout() {
@@ -25,15 +24,6 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
-        name="new-ubs"
-        options={{
-          title: "Cadastrar UBS",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="local-hospital" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="new-vaccin"
         options={{
           title: "Cadastrar Vacina",
@@ -53,27 +43,6 @@ export default function AdminLayout() {
       />
 
       {/* Telas ocultas do menu inferior */}
-      <Tabs.Screen
-        name="settings/index"
-        options={{
-          title: "Configurações",
-          href: null, 
-        }}
-      />
-      <Tabs.Screen
-        name="settings/new-user"
-        options={{
-          title: "Criar usuário",
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="settings/change-password"
-        options={{
-          title: "Alterar senha",
-          href: null,
-        }}
-      />
       <Tabs.Screen
         name="ubs-list"
         options={{

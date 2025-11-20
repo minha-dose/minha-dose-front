@@ -27,6 +27,11 @@ interface UBS {
     district?: string;
   };
 }
+interface Vaccin {
+  id: number;
+  name: string;
+}
+
 
 export default function NewVaccin() {
   const router = useRouter();
@@ -36,15 +41,19 @@ export default function NewVaccin() {
   const [loading, setLoading] = useState(false);
   const [loadingUbs, setLoadingUbs] = useState(true);
 
-  const [nomeVacina, setNomeVacina] = useState('');
   const [lote, setLote] = useState('');
   const [fabricante, setFabricante] = useState('');
 
   const [dataValidade, setDataValidade] = useState<Date | null>(null);
   const [showDataValidade, setShowDataValidade] = useState(false);
+  const [vaccinsList, setVaccinsList] = useState<Vaccin[]>([]);
+  const [selectedVaccin, setSelectedVaccin] = useState<Vaccin | null>(null);
+  const [showVaccinModal, setShowVaccinModal] = useState(false);
+  const [quantidade, setQuantidade] = useState('');
 
   useEffect(() => {
     fetchUbs();
+    fetchVaccins();
   }, []);
 
   const fetchUbs = async () => {
@@ -58,6 +67,15 @@ export default function NewVaccin() {
       setLoadingUbs(false);
     }
   };
+  const fetchVaccins = async () => {
+  try {
+    const response = await api.get('/api/v1/vaccin/');
+    setVaccinsList(response.data);
+  } catch (error) {
+    console.error('Erro ao buscar vacinas:', error);
+    Alert.alert('Erro', 'Não foi possível carregar a lista de vacinas.');
+  }
+};
 
   const formatDate = (date: Date | null): string => {
     if (!date) return '';
@@ -77,10 +95,11 @@ export default function NewVaccin() {
       Alert.alert('Atenção', 'Selecione uma UBS.');
       return;
     }
-    if (!nomeVacina.trim()) {
-      Alert.alert('Atenção', 'Preencha o nome da vacina.');
+    if (!selectedVaccin) {
+      Alert.alert('Atenção', 'Selecione uma vacina.');
       return;
     }
+
     if (!lote.trim()) {
       Alert.alert('Atenção', 'Preencha o lote.');
       return;
@@ -93,6 +112,11 @@ export default function NewVaccin() {
       Alert.alert('Atenção', 'Selecione a data de validade.');
       return;
     }
+    if (!quantidade.trim()) {
+    Alert.alert('Atenção', 'Informe a quantidade recebida.');
+    return;
+    }
+
 
     setLoading(true);
 
@@ -100,21 +124,22 @@ export default function NewVaccin() {
       const formatDateForAPI = (date: Date) => date.toISOString().split('T')[0];
 
       const payload = {
-        name: nomeVacina.trim(),
-        manufacturer: fabricante.trim(),
-        batch: lote.trim(),
-        expiration: formatDateForAPI(dataValidade),
-        ubsIds: [selectedUbs.id],
-      };
+      vaccinId: selectedVaccin.id,
+      ubsId: selectedUbs.id,
+      batch: lote.trim(),
+      manufacturer: fabricante.trim(),
+      expiration: formatDateForAPI(dataValidade),
+      quantity: Number(quantidade),
+    };
 
-      await api.post('/api/v1/vaccin/', payload);
+      await api.post('/api/v1/ubsvaccin/', payload);
+
 
       Alert.alert('Sucesso', 'Vacina cadastrada com sucesso!');
       router.push('/(protected)/(admin)/vaccins-list');
 
       // Resetar form
       setSelectedUbs(null);
-      setNomeVacina('');
       setLote('');
       setFabricante('');
       setDataValidade(null);
@@ -157,15 +182,14 @@ export default function NewVaccin() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Nome da vacina</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite o nome da vacina"
-            placeholderTextColor="#999"
-            value={nomeVacina}
-            onChangeText={setNomeVacina}
-          />
+          <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Vacina</Text>
+          <TouchableOpacity style={styles.input} onPress={() => setShowVaccinModal(true)}>
+            <Text style={[styles.inputText, !selectedVaccin && styles.placeholderText]}>
+              {selectedVaccin ? selectedVaccin.name : 'Selecione a vacina'}
+            </Text>
+            <Ionicons name="chevron-down" size={20} color="#666" />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.rowContainer}>
@@ -190,6 +214,18 @@ export default function NewVaccin() {
             />
           </View>
         </View>
+        <View style={styles.fieldContainer}>
+  <Text style={styles.label}>Quantidade</Text>
+  <TextInput
+    style={styles.input}
+    placeholder="Digite a quantidade"
+    placeholderTextColor="#999"
+    value={quantidade}
+    onChangeText={setQuantidade}
+    keyboardType="numeric"
+  />
+</View>
+
 
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>Data de validade</Text>
@@ -283,6 +319,52 @@ export default function NewVaccin() {
           </View>
         </View>
       </Modal>
+      <Modal
+  visible={showVaccinModal}
+  transparent
+  animationType="slide"
+  onRequestClose={() => setShowVaccinModal(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContainer}>
+      <View style={styles.modalHeader}>
+        <Text style={styles.modalTitle}>Selecione a Vacina</Text>
+        <TouchableOpacity onPress={() => setShowVaccinModal(false)}>
+          <Ionicons name="close" size={24} color="#083474" />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.modalList}>
+        {vaccinsList.map((v) => (
+          <TouchableOpacity
+            key={v.id}
+            style={[
+              styles.modalItem,
+              selectedVaccin?.id === v.id && styles.modalItemSelected,
+            ]}
+            onPress={() => {
+              setSelectedVaccin(v);
+              setShowVaccinModal(false);
+            }}
+          >
+            <Text
+              style={[
+                styles.modalItemText,
+                selectedVaccin?.id === v.id && styles.modalItemTextSelected,
+              ]}
+            >
+              {v.name}
+            </Text>
+            {selectedVaccin?.id === v.id && (
+              <Ionicons name="checkmark" size={20} color="#083474" />
+            )}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  </View>
+</Modal>
+
     </KeyboardAvoidingView>
   );
 }
