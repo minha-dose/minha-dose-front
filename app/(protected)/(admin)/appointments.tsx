@@ -2,24 +2,38 @@ import api from "@/api/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
+type User = {
+  id: number;
+  name: string;
+  cpf: string;
+};
+
+type Appointment = {
+  id: number;
+  date: string;
+  vaccinId: number;
+  vaccineName?: string;
+  status: string;
+};
+
 export default function AdminAppointments() {
-  const [users, setUsers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [selectedUserName, setSelectedUserName] = useState("Escolher usuário...");
   const [showUserModal, setShowUserModal] = useState(false);
 
-  const [appointments, setAppointments] = useState([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
 
@@ -39,36 +53,42 @@ export default function AdminAppointments() {
     fetchUsers();
   }, []);
 
-  const fetchVaccineName = async (vaccinId, cache) => {
-  if (cache[vaccinId]) {
-    return cache[vaccinId]; // já tenho no cache → evita requisição
-  }
+  // Buscar nome da vacina com cache
+  const fetchVaccineName = async (
+    vaccinId: number,
+    cache: Record<number, string>
+  ): Promise<string> => {
+    if (cache[vaccinId]) {
+      return cache[vaccinId];
+    }
 
-  try {
-    const resp = await api.get(`/api/v1/vaccin/${vaccinId}`);
-    const name = resp.data?.name || "Vacina";
-    cache[vaccinId] = name; // salva no cache
-    return name;
-  } catch (error) {
-    console.error("Erro ao buscar vacina:", error);
-    return "Vacina";
-  }
-};
+    try {
+      const resp = await api.get(`/api/v1/vaccin/${vaccinId}`);
+      const name = resp.data?.name || "Vacina";
+      cache[vaccinId] = name;
+      return name;
+    } catch (error) {
+      console.error("Erro ao buscar vacina:", error);
+      return "Vacina";
+    }
+  };
 
-
-  // Carrega agendamentos
- const fetchAppointments = async (userId) => {
+  // Carregar agendamentos do usuário
+ const fetchAppointments = async (userId: number) => {
   setLoadingAppointments(true);
   try {
     const resp = await api.get(`/api/v1/appointment/users/${userId}`);
-    const data = resp.data;
+    const raw = resp.data;
 
-    // cache local pra não repetir requisições
-    const vaccineCache = {};
+    if (!Array.isArray(raw)) {
+      setAppointments([]);
+      return;
+    }
 
-    // adiciona vaccineName em cada item
+    const vaccineCache: Record<number, string> = {};
+
     const enriched = await Promise.all(
-      data.map(async (item) => {
+      raw.map(async (item: Appointment) => {
         const vaccineName = await fetchVaccineName(item.vaccinId, vaccineCache);
         return { ...item, vaccineName };
       })
@@ -77,25 +97,37 @@ export default function AdminAppointments() {
     setAppointments(enriched);
   } catch (error) {
     console.error("Erro ao carregar agendamentos:", error);
+    setAppointments([]);
   } finally {
     setLoadingAppointments(false);
   }
 };
 
 
-  const selectUser = (user) => {
+  const selectUser = (user: User) => {
     setSelectedUserId(user.id);
     setSelectedUserName(`${user.name} • ${user.cpf}`);
     setShowUserModal(false);
     fetchAppointments(user.id);
   };
 
-  const handleComplete = async (id) => {
+  const handleComplete = async (appointment: Appointment) => {
     try {
-      await api.put(`/api/v1/appointment/${id}/complete`);
-      Alert.alert("Sucesso", "Agendamento marcado como concluído!");
-      fetchAppointments(selectedUserId);
+      await api.patch(`/api/v1/appointment/${appointment.id}/status`, {
+        status: "completed",
+      });
+
+      await api.patch(`/api/v1/ubsvaccin/decrement/${appointment.vaccinId}`);
+
+      Alert.alert("Sucesso", "Agendamento concluído e estoque atualizado!");
+
+      setAppointments((prev) =>
+        prev.map((item) =>
+          item.id === appointment.id ? { ...item, status: "completed" } : item
+        )
+      );
     } catch (error) {
+      console.error(error);
       Alert.alert("Erro", "Não foi possível concluir o agendamento.");
     }
   };
@@ -111,7 +143,6 @@ export default function AdminAppointments() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-
         <Text style={styles.label}>Selecione o usuário</Text>
 
         <TouchableOpacity
@@ -130,7 +161,6 @@ export default function AdminAppointments() {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>
-
               <Text style={styles.modalTitle}>Selecionar usuário</Text>
 
               <ScrollView style={{ maxHeight: 350 }}>
@@ -153,7 +183,6 @@ export default function AdminAppointments() {
               >
                 <Text style={styles.modalCloseText}>Cancelar</Text>
               </TouchableOpacity>
-
             </View>
           </View>
         </Modal>
@@ -177,11 +206,10 @@ export default function AdminAppointments() {
               <Ionicons name="calendar" size={28} color="#083474" />
 
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.cardTitle}>
-                  {item.vaccineName || "Vacina"}
+                <Text style={styles.cardTitle}>{item.vaccineName}</Text>
+                <Text style={styles.cardSub}>
+                  Data: {item.date?.substring(0, 10)}
                 </Text>
-
-                <Text style={styles.cardSub}>Data: {item.date?.substring(0, 10)}</Text>
                 <Text style={styles.cardSub}>
                   Status:{" "}
                   <Text style={{ fontWeight: "600" }}>
@@ -193,7 +221,7 @@ export default function AdminAppointments() {
               {item.status !== "completed" && (
                 <TouchableOpacity
                   style={styles.completeButton}
-                  onPress={() => handleComplete(item.id)}
+                  onPress={() => handleComplete(item)}
                 >
                   <Text style={styles.completeButtonText}>Concluir</Text>
                 </TouchableOpacity>
@@ -218,18 +246,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  screenTitle: {
-    fontSize: 18,
-    color: "#4A4A4A",
-    fontWeight: "600",
-    marginBottom: 20,
-  },
   label: {
     fontSize: 14,
     color: "#7A7A7A",
     marginBottom: 6,
   },
-
   selectButton: {
     borderWidth: 1,
     borderColor: "#D0D0D0",
@@ -243,7 +264,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#1C1C1C",
   },
-
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
@@ -279,13 +299,11 @@ const styles = StyleSheet.create({
     color: "#083474",
     fontWeight: "600",
   },
-
   emptyText: {
     marginTop: 20,
     fontSize: 15,
     color: "#6C6C6C",
   },
-
   card: {
     flexDirection: "row",
     alignItems: "center",

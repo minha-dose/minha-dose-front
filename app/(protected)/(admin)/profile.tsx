@@ -13,24 +13,32 @@ import {
   View,
 } from "react-native";
 
+type User = {
+  id: number;
+  name: string;
+  cpf: string;
+  email: string;
+};
+
 export default function AdminProfile() {
   const router = useRouter();
 
-  const user = useUserStore((state) => state.user);
+  const user = useUserStore((state) => state.user) as User | null;
   const setUser = useUserStore((state) => state.setUser);
 
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  // Busca dados do usuário logado
   useEffect(() => {
     if (!user?.id) return;
 
     const fetchUser = async () => {
       try {
         const response = await api.get(`/api/v1/users/${user.id}`);
-        setUserData(response.data);
+        setUserData(response.data as User);
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error);
       } finally {
@@ -46,7 +54,10 @@ export default function AdminProfile() {
     router.replace("/");
   };
 
+  // Salvar edição
   const handleSave = async () => {
+    if (!user || !userData) return;
+
     setIsSaving(true);
 
     try {
@@ -144,7 +155,9 @@ export default function AdminProfile() {
           {isEditing ? (
             <TextInput
               value={userData.email}
-              onChangeText={(text) => setUserData({ ...userData, email: text })}
+              onChangeText={(text) =>
+                setUserData({ ...userData, email: text })
+              }
               style={styles.input}
             />
           ) : (
