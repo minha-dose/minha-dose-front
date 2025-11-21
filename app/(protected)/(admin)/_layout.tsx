@@ -33,6 +33,13 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="appointments"
+        options={{
+                    title: 'Agendamento',
+                    tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />
+                }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Perfil",
