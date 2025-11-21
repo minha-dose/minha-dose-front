@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -36,6 +37,13 @@ export default function AdminAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredUsers = users.filter(u =>
+  u.name.toLowerCase().includes(search.toLowerCase()) ||
+  u.cpf.includes(search)
+);
+
 
   // Carrega usuários
   useEffect(() => {
@@ -158,38 +166,60 @@ export default function AdminAppointments() {
         </TouchableOpacity>
 
         <Modal
-          animationType="slide"
-          transparent={true}
-          visible={showUserModal}
-          onRequestClose={() => setShowUserModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalBox}>
-              <Text style={styles.modalTitle}>Selecionar usuário</Text>
+        animationType="slide"
+        transparent={true}
+        visible={showUserModal}
+        onRequestClose={() => setShowUserModal(false)}
+      >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalBox}>
+          <Text style={styles.modalTitle}>Selecionar usuário</Text>
 
-              <ScrollView style={{ maxHeight: 350 }}>
-                {users.map((u) => (
-                  <TouchableOpacity
-                    key={u.id}
-                    style={styles.modalItem}
-                    onPress={() => selectUser(u)}
-                  >
-                    <Text style={styles.modalItemText}>
-                      {u.name} • {u.cpf}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+      {/* Campo de busca */}
+      <TextInput
+        placeholder="Buscar usuário..."
+        placeholderTextColor="#999"
+        value={search}
+        onChangeText={setSearch}
+        style={styles.searchInput}
+      />
 
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={() => setShowUserModal(false)}
-              >
-                <Text style={styles.modalCloseText}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+      <ScrollView style={{ maxHeight: 350 }}>
+        {filteredUsers.length === 0 ? (
+          <Text style={{ textAlign: "center", color: "#6C6C6C", marginTop: 10 }}>
+            Nenhum usuário encontrado.
+          </Text>
+        ) : (
+          filteredUsers.map((u) => (
+            <TouchableOpacity
+              key={u.id}
+              style={styles.modalItem}
+              onPress={() => {
+                selectUser(u);
+                setSearch("");
+              }}
+            >
+              <Text style={styles.modalItemText}>
+                {u.name} • {u.cpf}
+              </Text>
+            </TouchableOpacity>
+          ))
+        )}
+      </ScrollView>
+
+      <TouchableOpacity
+        style={styles.modalCloseButton}
+        onPress={() => {
+          setShowUserModal(false);
+          setSearch("");
+        }}
+      >
+        <Text style={styles.modalCloseText}>Cancelar</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
 
         {loadingAppointments && (
           <View style={styles.center}>
@@ -250,6 +280,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  searchInput: {
+  borderWidth: 1,
+  borderColor: "#D0D0D0",
+  borderRadius: 8,
+  padding: 10,
+  fontSize: 15,
+  marginBottom: 12,
+},
   label: {
     fontSize: 14,
     color: "#7A7A7A",
