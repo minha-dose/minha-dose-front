@@ -95,9 +95,13 @@ export default function AdminAppointments() {
     );
 
     setAppointments(enriched);
-  } catch (error) {
-    console.error("Erro ao carregar agendamentos:", error);
-    setAppointments([]);
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      setAppointments([]);
+    } else {
+      console.error("Erro ao carregar agendamentos:", error);
+      Alert.alert("Erro", "Não foi possível carregar os agendamentos.");
+    }
   } finally {
     setLoadingAppointments(false);
   }
