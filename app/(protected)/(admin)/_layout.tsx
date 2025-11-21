@@ -51,13 +51,6 @@ export default function AdminLayout() {
 
       {/* Telas ocultas do menu inferior */}
       <Tabs.Screen
-        name="ubs-list"
-        options={{
-          title: "UBS cadastradas",
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="vaccins-list"
         options={{
           title: "Vacinas cadastradas",
