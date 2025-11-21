@@ -121,7 +121,6 @@ export default function VaccinList() {
 
   return (
     <View style={styles.container}>
-      {/* SELECT CUSTOMIZADO */}
       <Text style={styles.label}>Selecione uma UBS</Text>
 
       <TouchableOpacity
@@ -134,7 +133,6 @@ export default function VaccinList() {
         <Ionicons name="chevron-down" size={20} color="#022757" />
       </TouchableOpacity>
 
-      {/* MODAL DE UBS */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
@@ -165,14 +163,12 @@ export default function VaccinList() {
         </View>
       </Modal>
 
-      {/* Loading inicial da UBS */}
       {loading && !selectedUbs && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#083474" />
         </View>
       )}
 
-      {/* Lista aparece só quando UBS escolhida */}
       {selectedUbs && (
         <FlatList
           data={vaccines}
@@ -235,7 +231,6 @@ const styles = StyleSheet.create({
     color: "#022757",
   },
 
-  /** SELECT CUSTOM */
   selectButton: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -249,7 +244,6 @@ const styles = StyleSheet.create({
   },
   selectButtonText: { fontSize: 15, color: "#022757" },
 
-  /** MODAL */
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
@@ -284,7 +278,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  /** LISTA */
   loadingContainer: {
     marginTop: 30,
     justifyContent: "center",

@@ -3,18 +3,33 @@ import { useUserStore } from "@/app/store/useUserStore";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function AdminProfile() {
   const router = useRouter();
-  const { setUser } = useUserStore(); 
-  const [user, setUserData] = useState(null);
+
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
+    if (!user?.id) return;
+
     const fetchUser = async () => {
       try {
-        const response = await api.get("/api/v1/users/7");
+        const response = await api.get(`/api/v1/users/${user.id}`);
         setUserData(response.data);
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error);
@@ -24,11 +39,30 @@ export default function AdminProfile() {
     };
 
     fetchUser();
-  }, []);
+  }, [user]);
 
   const handleLogout = () => {
-    setUser(null); // limpa Zustand
-    router.replace("/"); 
+    setUser(null);
+    router.replace("/");
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+
+    try {
+      await api.put(`/api/v1/users/${user.id}`, {
+        name: userData.name,
+        email: userData.email,
+      });
+
+      Alert.alert("Sucesso", "Dados atualizados com sucesso!");
+      setIsEditing(false);
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível atualizar os dados.");
+      console.error("Erro ao atualizar usuário:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (loading) {
@@ -39,10 +73,12 @@ export default function AdminProfile() {
     );
   }
 
-  if (!user) {
+  if (!userData) {
     return (
       <View style={[styles.container, styles.center]}>
-        <Text style={{ color: "#6C6C6C" }}>Não foi possível carregar o perfil.</Text>
+        <Text style={{ color: "#6C6C6C" }}>
+          Não foi possível carregar o perfil.
+        </Text>
       </View>
     );
   }
@@ -50,39 +86,86 @@ export default function AdminProfile() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+        {/* Header */}
         <View style={styles.headerRow}>
-          <Text style={styles.sectionTitle}>Meu Cadastro</Text>
+          <Text style={styles.sectionTitle}>Admin • Meu Cadastro</Text>
 
           <TouchableOpacity onPress={handleLogout}>
-            <FontAwesome name="sign-out" size={20} color="#083474" />
+            <FontAwesome name="sign-out" size={24} color="#083474" />
           </TouchableOpacity>
         </View>
 
+        {/* Perfil */}
         <View style={styles.profileRow}>
-          <View style={styles.avatarContainer}>
-            <Ionicons name="person-circle" size={64} color="#083474" />
-          </View>
+          <Ionicons name="person-circle" size={64} color="#083474" />
 
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{user.name || "Nome não informado"}</Text>
-            <Text style={styles.userCpf}>{user.cpf || "CPF não informado"}</Text>
+            {isEditing ? (
+              <>
+                <TextInput
+                  value={userData.name}
+                  onChangeText={(text) =>
+                    setUserData({ ...userData, name: text })
+                  }
+                  style={styles.input}
+                />
+
+                <TextInput
+                  value={userData.cpf}
+                  editable={false}
+                  style={[styles.input, { backgroundColor: "#EAEAEA" }]}
+                />
+              </>
+            ) : (
+              <>
+                <Text style={styles.userName}>
+                  {userData.name || "Nome não informado"}
+                </Text>
+                <Text style={styles.userCpf}>
+                  {userData.cpf || "CPF não informado"}
+                </Text>
+              </>
+            )}
           </View>
 
-          <View style={styles.actionIcons}>
-            <TouchableOpacity onPress={() => router.push("/(protected)/(admin)/settings")}>
-              <Ionicons name="settings-sharp" size={20} color="#083474" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={{ marginLeft: 10 }}>
-              <MaterialIcons name="edit" size={20} color="#083474" />
-            </TouchableOpacity>
-          </View>
+          {/* Botão editar */}
+          <TouchableOpacity
+            style={{ marginLeft: 10 }}
+            onPress={() => setIsEditing((prev) => !prev)}
+          >
+            <MaterialIcons name="edit" size={22} color="#083474" />
+          </TouchableOpacity>
         </View>
 
+        {/* E-mail */}
         <View style={styles.infoBlock}>
           <Text style={styles.label}>E-mail</Text>
-          <Text style={styles.value}>{user.email || "E-mail não informado"}</Text>
+
+          {isEditing ? (
+            <TextInput
+              value={userData.email}
+              onChangeText={(text) => setUserData({ ...userData, email: text })}
+              style={styles.input}
+            />
+          ) : (
+            <Text style={styles.value}>
+              {userData.email || "E-mail não informado"}
+            </Text>
+          )}
         </View>
+
+        {/* Botão salvar */}
+        {isEditing && (
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSave}
+            disabled={isSaving}
+          >
+            <Text style={styles.saveButtonText}>
+              {isSaving ? "Salvando..." : "Salvar"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -107,32 +190,27 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#4A4A4A",
-    fontWeight: "500",
+    fontWeight: "600",
   },
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  avatarContainer: {
-    marginRight: 10,
+    marginTop: 10,
   },
   userInfo: {
     flex: 1,
+    marginLeft: 10,
   },
   userName: {
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 18,
+    fontWeight: "600",
     color: "#1C1C1C",
   },
   userCpf: {
     fontSize: 14,
     color: "#6C6C6C",
-  },
-  actionIcons: {
-    flexDirection: "row",
-    alignItems: "center",
   },
   infoBlock: {
     marginTop: 20,
@@ -143,8 +221,28 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   value: {
-    fontSize: 14,
-    color: "#1C1C1C",
+    fontSize: 15,
     fontWeight: "500",
+    color: "#1C1C1C",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#D0D0D0",
+    borderRadius: 6,
+    padding: 10,
+    fontSize: 15,
+    marginTop: 4,
+  },
+  saveButton: {
+    backgroundColor: "#083474",
+    paddingVertical: 12,
+    marginTop: 25,
+    borderRadius: 8,
+  },
+  saveButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
