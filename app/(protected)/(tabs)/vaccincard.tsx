@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import api from '../../../api/api';
 import { globalStyles } from '../../../global';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useUserStore } from '../../store/useUserStore';
 
 interface Vaccine {
   id: number;
   name: string;
   manufacturer: string;
-  batch: number;
+  batch: string;
   expiration: string;
+  date: string;
+  ubsName: string;
 }
 
 export default function VaccinCardScreen() {
@@ -23,11 +25,61 @@ export default function VaccinCardScreen() {
       if (!user?.id) return;
 
       try {
-        const response = await api.get(`/api/v1/vaccincard/user/${user.id}`);
-        const vaccins = response.data?.vaccins || [];
-        setVaccines(vaccins);
-      } catch (error) {
-        console.error('Erro ao buscar vacinas:', error);
+        // Buscar agendamentos concluídos do usuário
+        const appointmentsResponse = await api.get(`/api/v1/appointment/users/${user.id}`);
+        const appointments = appointmentsResponse.data || [];
+
+        // Filtrar apenas agendamentos concluídos
+        const completedAppointments = appointments.filter(
+          (apt: any) => apt.status === 'completed'
+        );
+
+        // Para cada agendamento concluído, buscar os detalhes da vacina
+        const vaccinesData = await Promise.all(
+          completedAppointments.map(async (apt: any) => {
+            try {
+              // Buscar todas as UBS que têm essa vacina
+              const ubsVaccinResponse = await api.get(
+                `/api/v1/ubsvaccin/findUbsVaccinByVaccinId/${apt.vaccinId}`
+              );
+              const ubsVaccins = ubsVaccinResponse.data;
+
+              // Filtrar pela UBS específica do agendamento
+              const ubsVaccinData = ubsVaccins.find(
+                (item: any) => item.ubsId === apt.ubsId
+              );
+
+              if (!ubsVaccinData) {
+                console.error(`UBS Vaccin não encontrada para agendamento ${apt.id}`);
+                return null;
+              }
+
+              return {
+                id: apt.id,
+                name: ubsVaccinData.vaccin?.name || 'Vacina',
+                manufacturer: ubsVaccinData.manufacturer,
+                batch: ubsVaccinData.batch,
+                expiration: ubsVaccinData.expiration,
+                date: apt.date,
+                ubsName: ubsVaccinData.ubs?.ubsName || 'UBS',
+              };
+            } catch (error) {
+              console.error(`Erro ao buscar detalhes da vacina ${apt.id}:`, error);
+              return null;
+            }
+          })
+        );
+
+        // Filtrar valores nulos e definir as vacinas
+        const validVaccines = vaccinesData.filter((v) => v !== null) as Vaccine[];
+        setVaccines(validVaccines);
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          // Usuário não tem agendamentos
+          setVaccines([]);
+        } else {
+          console.error('Erro ao buscar vacinas:', error);
+        }
       } finally {
         setLoading(false);
       }
@@ -71,6 +123,7 @@ export default function VaccinCardScreen() {
                 <Text style={styles.text}>
                   Validade: {new Date(item.expiration).toLocaleDateString('pt-BR')}
                 </Text>
+                <Text style={styles.text}>Local: {item.ubsName}</Text>
               </View>
             </View>
           )}
