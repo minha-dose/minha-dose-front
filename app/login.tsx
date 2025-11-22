@@ -1,8 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import api from '../api/api';
 import logo from '../assets/images/logo/minha-dose-logo.jpeg';
+import { globalStyles } from '../global';
 import { useUserStore } from './store/useUserStore';
 import { useUserDataStore } from './store/userDataStore';
 
@@ -23,6 +25,7 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [verifiedEmail, setVerifiedEmail] = useState(false);
   const [userFound, setUserFound] = useState<User | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleVerifyEmail() {
     setError('');
@@ -49,46 +52,46 @@ export default function LoginScreen() {
   }
 
   async function handleLogin() {
-  setError('');
+    setError('');
 
-  try {
-    const response = await api.post(
-      '/api/v1/auth/login',
-      { email, password: senha },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
+    try {
+      const response = await api.post(
+        '/api/v1/auth/login',
+        { email, password: senha },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
-    const { token } = response.data;
+      const { token } = response.data;
 
-    if (!token) {
-      setError('Falha ao autenticar usuário.');
-      return;
-    }
+      if (!token) {
+        setError('Falha ao autenticar usuário.');
+        return;
+      }
 
-    // Cria um novo objeto com o userFound e o token
-    const userData = {
-      ...userFound,
-      token,
-    } as User;
+      // Cria um novo objeto com o userFound e o token
+      const userData = {
+        ...userFound,
+        token,
+      } as User;
 
-    // Salva o usuário no Zustand
-    setUser(userData);
+      // Salva o usuário no Zustand
+      setUser(userData);
 
-    // Verifica a role e redireciona
-    if (userData.role === 'admin') {
-      router.push('/(protected)/(admin)/home');
-    } else {
-      router.push('/(protected)/(tabs)/home');
-    }
+      // Verifica a role e redireciona
+      if (userData.role === 'admin') {
+        router.push('/(protected)/(admin)/home');
+      } else {
+        router.push('/(protected)/(tabs)/home');
+      }
 
-  } catch (e: any) {
-    if (e.response?.status === 401) {
-      setError('Senha incorreta.');
-    } else {
-      setError('Erro ao realizar login.');
+    } catch (e: any) {
+      if (e.response?.status === 401) {
+        setError('Senha incorreta.');
+      } else {
+        setError('Erro ao realizar login.');
+      }
     }
   }
-}
 
   return (
     <View style={styles.container}>
@@ -110,21 +113,30 @@ export default function LoginScreen() {
 
         {verifiedEmail && (
           <>
-            <TextInput
-              placeholder="Senha"
-              placeholderTextColor="#fff"
-              style={styles.input}
-              value={senha}
-              onChangeText={setSenha}
-              secureTextEntry
-            />
+            <View style={globalStyles.passwordContainer}>
+              <TextInput
+                placeholder="Senha"
+                placeholderTextColor="#fff"
+                style={[styles.input, { flex: 1, borderWidth: 0 }]}
+                value={senha}
+                onChangeText={setSenha}
+                secureTextEntry={showPassword === false}
+              />
+
+              <TouchableOpacity onPress={() => setShowPassword((prev) => !prev)}>
+                <Ionicons
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={24}
+                  color="#fff"
+                />
+              </TouchableOpacity>
+            </View>
 
             <View style={{ alignItems: 'center', width: '100%' }}>
-            <TouchableOpacity onPress={() => router.push('/(reset)/reset-first')}>
-           <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
-          </TouchableOpacity>
-          </View>
-
+              <TouchableOpacity onPress={() => router.push('/(reset)/reset-first')}>
+                <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
+              </TouchableOpacity>
+            </View>
           </>
         )}
 

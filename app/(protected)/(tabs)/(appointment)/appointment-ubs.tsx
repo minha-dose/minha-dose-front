@@ -83,32 +83,56 @@ export default function AppointmentUbs() {
 
   const handleSchedule = async () => {
     if (!selectedUbsId || !selectedDate || !selectedTime) {
-      Alert.alert("Atenção", "Selecione a UBS, data e horário antes de agendar.");
+      Alert.alert(
+        "Atenção",
+        "Selecione a UBS, data e horário antes de agendar."
+      );
       return;
     }
 
     try {
-      const dateTime = `${selectedDate}T${selectedTime}:00`;
+      const ubsvaccinResponse = await api.get(
+        `/api/v1/ubsvaccin/findUbsVaccinByVaccinId/${vaccineId}`
+      );
 
+      const found = ubsvaccinResponse.data.find(
+        (item: any) => item.ubs.id === selectedUbsId
+      );
+
+      if (!found) {
+        Alert.alert("Erro", "Não foi possível identificar o estoque da UBS.");
+        return;
+      }
+
+      const ubsVaccinId = found.id;
+
+      const dateTime = `${selectedDate}T${selectedTime}:00`;
       const dateTimeObj = new Date(dateTime);
-      const dateTimeAdjusted = new Date(dateTimeObj.getTime() + 3 * 60 * 60 * 1000);
+      const dateTimeAdjusted = new Date(
+        dateTimeObj.getTime() + 3 * 60 * 60 * 1000
+      );
 
       const formattedDateTime = `${dateTimeAdjusted.getFullYear()}-${String(
         dateTimeAdjusted.getMonth() + 1
       ).padStart(2, "0")}-${String(dateTimeAdjusted.getDate()).padStart(
         2,
         "0"
-      )}T${String(dateTimeAdjusted.getHours()).padStart(2, "0")}:${String(
-        dateTimeAdjusted.getMinutes()
-      ).padStart(2, "0")}`;
+      )}T${String(dateTimeAdjusted.getHours()).padStart(
+        2,
+        "0"
+      )}:${String(dateTimeAdjusted.getMinutes()).padStart(2, "0")}`;
 
-      await api.post("/api/v1/appointment", {
+
+      const payload = {
         userId: user?.id,
         ubsId: selectedUbsId,
         vaccinId: Number(vaccineId),
+        ubsVaccinId: ubsVaccinId,
         date: formattedDateTime,
         status: "scheduled",
-      });
+      };
+
+      await api.post("/api/v1/appointment", payload);
 
       Alert.alert("Sucesso!", "Agendamento realizado com sucesso!");
       setSelectedTime(null);

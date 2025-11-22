@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import api from '../../../api/api';
-import { useUserStore } from '../../store/useUserStore';
 import FloatingChatButton from "../../../components/FloatingChatButton";
+import { useUserStore } from '../../store/useUserStore';
 
 
 const { width } = Dimensions.get('window');
 
 const images = [
-  require("../../../assets/images/splash-icon.png"),
-  require("../../../assets/images/splash-icon.png"),
-  require("../../../assets/images/splash-icon.png"),
+  {uri: "https://res.cloudinary.com/dbppapvtn/image/upload/v1763823571/geral-vaccin_gpyzno.jpg"},
+  {uri: "https://res.cloudinary.com/dbppapvtn/image/upload/v1763823571/Campanha-vacinacao_ywg9p9.png"},
+  {uri: "https://res.cloudinary.com/dbppapvtn/image/upload/v1763823571/hpv-vaccin_bzesfk.jpg"}
 ];
 
 export default function Home() {
@@ -55,12 +55,12 @@ export default function Home() {
         <Carousel
           loop
           width={width}
-          height={200}
+          height={400}
           autoPlay
           data={images}
           scrollAnimationDuration={1000}
           renderItem={({ item, index }) => (
-            <Image key={index} source={item} style={styles.image} resizeMode="contain" />
+            <Image source={{uri: item.uri}} style={styles.image} resizeMode="contain" />
           )}
         />
         <FloatingChatButton />
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#002F6C",
     padding: 20,
+    paddingTop: 60,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
@@ -82,8 +83,8 @@ const styles = StyleSheet.create({
   title: { fontSize: 16, fontWeight: "bold", color: "#002F6C", marginBottom: 10 },
   paragraph: { fontSize: 14, marginBottom: 10, textAlign: "justify", color: "#333" },
   image: {
-    width: width - 40,
-    height: 180,
+    width: width,
+    height: 300,
     alignSelf: "center",
     borderRadius: 8,
   },

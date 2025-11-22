@@ -127,13 +127,13 @@ export const globalStyles = StyleSheet.create({
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#F5F5F5',
     borderWidth: 1,
+    borderColor: '#fff',
     borderRadius: 5,
-    paddingHorizontal: 10,
-    marginVertical: 12,
+    width: '100%',
     height: 50,
-    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    marginBottom: 12,
   },
   eyeButton: {
     paddingLeft: 10,
@@ -330,5 +330,10 @@ export const globalStyles = StyleSheet.create({
   loadingAppointmentTxt: {
     marginTop: 10,
     color: "#002856"
-  }
+  },
+  showPasswordText: {
+    color: '#fff',
+    marginLeft: 10,
+    textDecorationLine: 'underline',
+  },
 });
