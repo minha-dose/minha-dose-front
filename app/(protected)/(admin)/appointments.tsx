@@ -24,6 +24,7 @@ type Appointment = {
   id: number;
   date: string;
   vaccinId: number;
+  ubsVaccinId: number;
   vaccineName?: string;
   status: string;
 };
@@ -81,39 +82,59 @@ export default function AdminAppointments() {
     }
   };
 
+  // Buscar ubsVaccinId
+  const fetchUbsVaccinId = async (
+    vaccinId: number,
+    ubsId: number
+  ): Promise<number | null> => {
+    try {
+      const resp = await api.get(
+        `/api/v1/ubsvaccin/findUbsVaccinByVaccinId/${vaccinId}`
+      );
+
+      const found = resp.data.find((item: any) => item.ubs.id === ubsId);
+
+      return found?.id || null;
+    } catch (error) {
+      console.error("Erro ao buscar ubsVaccinId:", error);
+      return null;
+    }
+  };
+
   // Carregar agendamentos do usuário
- const fetchAppointments = async (userId: number) => {
-  setLoadingAppointments(true);
-  try {
-    const resp = await api.get(`/api/v1/appointment/users/${userId}`);
-    const raw = resp.data;
+  const fetchAppointments = async (userId: number) => {
+    setLoadingAppointments(true);
+    try {
+      const resp = await api.get(`/api/v1/appointment/users/${userId}`);
+      const raw = resp.data;
 
-    if (!Array.isArray(raw)) {
-      setAppointments([]);
-      return;
+      if (!Array.isArray(raw)) {
+        setAppointments([]);
+        return;
+      }
+
+      const vaccineCache: Record<number, string> = {};
+
+      const enriched = await Promise.all(
+        raw.map(async (item: any) => {
+          const vaccineName = await fetchVaccineName(item.vaccinId, vaccineCache);
+          const ubsVaccinId = await fetchUbsVaccinId(item.vaccinId, item.ubsId);
+          return { ...item, vaccineName, ubsVaccinId };
+        })
+      );
+
+      setAppointments(enriched);
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        setAppointments([]);
+      } else {
+        console.error("Erro ao carregar agendamentos:", error);
+        Alert.alert("Erro", "Não foi possível carregar os agendamentos.");
+      }
+    } finally {
+      setLoadingAppointments(false);
     }
-
-    const vaccineCache: Record<number, string> = {};
-
-    const enriched = await Promise.all(
-      raw.map(async (item: Appointment) => {
-        const vaccineName = await fetchVaccineName(item.vaccinId, vaccineCache);
-        return { ...item, vaccineName };
-      })
-    );
-
-    setAppointments(enriched);
-  } catch (error: any) {
-    if (error.response?.status === 404) {
-      setAppointments([]);
-    } else {
-      console.error("Erro ao carregar agendamentos:", error);
-      Alert.alert("Erro", "Não foi possível carregar os agendamentos.");
-    }
-  } finally {
-    setLoadingAppointments(false);
-  }
-};
+  };
 
 
   const selectUser = (user: User) => {
@@ -125,11 +146,27 @@ export default function AdminAppointments() {
 
   const handleComplete = async (appointment: Appointment) => {
     try {
+      console.log("Starting completion for appointment:", appointment);
+      console.log("Appointment ID:", appointment.id);
+      console.log("UBS Vaccin ID:", appointment.ubsVaccinId);
+
       await api.patch(`/api/v1/appointment/${appointment.id}/status`, {
         status: "completed",
       });
 
-      await api.patch(`/api/v1/ubsvaccin/decrement/${appointment.vaccinId}`);
+      console.log("Status updated successfully, now decrementing stock...");
+
+      const response = await api.patch(
+        `/api/v1/ubsvaccin/decrement/${appointment.ubsVaccinId}`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log("Decrement response:", response.data);
 
       Alert.alert("Sucesso", "Agendamento concluído e estoque atualizado!");
 
@@ -138,9 +175,19 @@ export default function AdminAppointments() {
           item.id === appointment.id ? { ...item, status: "completed" } : item
         )
       );
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Não foi possível concluir o agendamento.");
+    } catch (error: any) {
+      console.error("Full error object:", error);
+      console.error("Error response data:", error.response?.data);
+      console.error("Error response status:", error.response?.status);
+      console.error("Error config:", error.config);
+      console.error("Error request:", error.request);
+
+      Alert.alert(
+        "Erro",
+        `Não foi possível concluir o agendamento.\n${
+          error.response?.data?.message || error.message || ""
+        }`
+      );
     }
   };
 
