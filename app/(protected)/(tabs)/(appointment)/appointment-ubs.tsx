@@ -24,6 +24,7 @@ type Ubs = {
 export default function AppointmentUbs() {
   const { vaccineId } = useLocalSearchParams<{ vaccineId: string }>();
   const user = useUserStore((state) => state.user);
+
   const [ubsList, setUbsList] = useState<Ubs[]>([]);
   const [selectedUbsId, setSelectedUbsId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,8 +35,16 @@ export default function AppointmentUbs() {
 
   const fetchUbsByVaccine = async () => {
     try {
-      const response = await api.get(`/api/v1/vaccin/${vaccineId}`);
-      setUbsList(response.data.ubs || []);
+      const response = await api.get(
+        `/api/v1/ubsvaccin/findUbsVaccinByVaccinId/${vaccineId}`
+      );
+
+      const formatted = response.data.map((item: any) => ({
+        id: item.ubs.id,
+        ubsName: item.ubs.ubsName,
+      }));
+
+      setUbsList(formatted);
     } catch (error) {
       console.error("Erro ao buscar UBS:", error);
     } finally {
@@ -56,12 +65,12 @@ export default function AppointmentUbs() {
       const filteredTimes =
         date === currentDate
           ? response.data.freeTimes.filter((time: string) => {
-            const [hour, minute] = time.split(":").map(Number);
-            return (
-              hour > now.getHours() ||
-              (hour === now.getHours() && minute > now.getMinutes())
-            );
-          })
+              const [hour, minute] = time.split(":").map(Number);
+              return (
+                hour > now.getHours() ||
+                (hour === now.getHours() && minute > now.getMinutes())
+              );
+            })
           : response.data.freeTimes;
 
       setAvailableTimes(filteredTimes || []);
@@ -86,12 +95,13 @@ export default function AppointmentUbs() {
 
       const formattedDateTime = `${dateTimeAdjusted.getFullYear()}-${String(
         dateTimeAdjusted.getMonth() + 1
-      ).padStart(2, "0")}-${String(dateTimeAdjusted.getDate()).padStart(2, "0")} ${String(
-        dateTimeAdjusted.getHours()
-      ).padStart(2, "0")}:${String(dateTimeAdjusted.getMinutes()).padStart(2, "0")}:${String(
-        dateTimeAdjusted.getSeconds()
+      ).padStart(2, "0")}-${String(dateTimeAdjusted.getDate()).padStart(
+        2,
+        "0"
+      )}T${String(dateTimeAdjusted.getHours()).padStart(2, "0")}:${String(
+        dateTimeAdjusted.getMinutes()
       ).padStart(2, "0")}`;
-      
+
       await api.post("/api/v1/appointment", {
         userId: user?.id,
         ubsId: selectedUbsId,
@@ -220,12 +230,12 @@ export default function AppointmentUbs() {
             markedDates={
               selectedDate
                 ? {
-                  [selectedDate]: {
-                    selected: true,
-                    selectedColor: "#002856",
-                    selectedTextColor: "#fff",
-                  },
-                }
+                    [selectedDate]: {
+                      selected: true,
+                      selectedColor: "#002856",
+                      selectedTextColor: "#fff",
+                    },
+                  }
                 : {}
             }
             theme={{
