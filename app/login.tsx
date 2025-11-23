@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import api from '../api/api';
-import logo from '../assets/images/logo/minha-dose-logo.jpeg';
+import logo from '../assets/images/logo/minha-dose-logo.png';
 import { globalStyles } from '../global';
 import { useUserStore } from './store/useUserStore';
 import { useUserDataStore } from './store/userDataStore';
