@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import logo from '../assets/images/logo/minha-dose-logo.png';
+import ops from '../assets/images/minha-dose-ops.png';
 
 export default function LoadingPage() {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function LoadingPage() {
           Vamos criar uma?{"\n"}É super rápido!
         </Text>
         <Image
-          source={logo}
+          source={ops}
           style={globalStyles.loadingImage}
           onLoad={() => setImageLoaded(true)}
         />
