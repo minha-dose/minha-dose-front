@@ -1,6 +1,6 @@
 import { FontAwesome6 } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -65,12 +65,12 @@ export default function AppointmentUbs() {
       const filteredTimes =
         date === currentDate
           ? response.data.freeTimes.filter((time: string) => {
-              const [hour, minute] = time.split(":").map(Number);
-              return (
-                hour > now.getHours() ||
-                (hour === now.getHours() && minute > now.getMinutes())
-              );
-            })
+            const [hour, minute] = time.split(":").map(Number);
+            return (
+              hour > now.getHours() ||
+              (hour === now.getHours() && minute > now.getMinutes())
+            );
+          })
           : response.data.freeTimes;
 
       setAvailableTimes(filteredTimes || []);
@@ -134,7 +134,14 @@ export default function AppointmentUbs() {
 
       await api.post("/api/v1/appointment", payload);
 
-      Alert.alert("Sucesso!", "Agendamento realizado com sucesso!");
+      Alert.alert("Sucesso!", "Agendamento realizado com sucesso!", [
+        {
+          text: "OK",
+          onPress: () => {
+            router.push("/appointment");
+          }
+        }
+      ]);
       setSelectedTime(null);
     } catch (error) {
       console.error("Erro ao agendar:", error);
@@ -176,6 +183,12 @@ export default function AppointmentUbs() {
 
   return (
     <ScrollView style={globalStyles.appointmentMainView}>
+      <TouchableOpacity
+        onPress={() => router.push("/appointment")}
+        style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 15 }}
+      >
+        <FontAwesome6 name="arrow-left" size={22} color="#002856" />
+      </TouchableOpacity>
       <Text style={globalStyles.appointmentScreenTitle}>
         Agora, selecione a melhor UBS para você:
       </Text>
@@ -254,12 +267,12 @@ export default function AppointmentUbs() {
             markedDates={
               selectedDate
                 ? {
-                    [selectedDate]: {
-                      selected: true,
-                      selectedColor: "#002856",
-                      selectedTextColor: "#fff",
-                    },
-                  }
+                  [selectedDate]: {
+                    selected: true,
+                    selectedColor: "#002856",
+                    selectedTextColor: "#fff",
+                  },
+                }
                 : {}
             }
             theme={{

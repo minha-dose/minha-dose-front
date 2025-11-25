@@ -256,7 +256,6 @@ export const globalStyles = StyleSheet.create({
   },
   appointmentScreenTitle: {
     fontSize: 15,
-    marginTop: 20,
     color: "#002856",
     textAlign: "center",
     marginBottom: 20,
